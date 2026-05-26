@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Web Dev Assignment 1</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web Dev Assignment 1">
+    <meta name="keywords" content="Assignment">
+    <meta name="author" content="Ruiyi Guo">
+    <link rel="stylesheet" href="style/desktop.css" type="text/css">
+    <link rel="stylesheet" href="style/mobile.css" type="text/css">
+</head>
+
+<body>
+    <header>
+        <h1>Food I like</h1>
+    </header>
+
+    <button id="navToggle">☰</button>
+
+    <nav id="mainNav" class="hidden">
+        <ul>
+            <li><a href="Home.html">Home Page</a></li>
+            <li><a href="Abode.html">Where I live</a></li>
+            <li><a href="Food.html">Food I like</a></li>
+            <li><a href="Activities.html">Stuff I do</a></li>
+            <li><a href="Video.html">Video</a></li>
+            <li><a href="Animations.html">Animations</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+
+        <article>
+            <h2>Some favourite places in Melbourne</h2>
+
+            <!-- Restaurants -->
+            <section>
+                <h3>Restaurants</h3>
+                <ul>
+                    <li>Torisong</li>
+                    <li>Tanyu</li>
+                    <li>HaiDiLao</li>
+                    <li>Rosa's Kitchen</li>
+                </ul>
+
+
+            </section>
+
+            <!-- Favourite Food -->
+            <section>
+                <h3>Favourite Food</h3>
+                <ul>
+                    <li>Noodles (Soup)</li>
+                    <li>Noodles (Dry)</li>
+                    <li>Noodles (Cold)</li>
+                    <li>Everything else. Not a picky eater, very adventurous.</li>
+                </ul>
+
+                <h3>Drinks</h3>
+                <ul>
+                    <li>Water</li>
+                    <li>Fruit Tea (Adjacent to boba)</li>
+                    <li>Juice (Not fruit tea)</li>
+                    <li>Soda</li>
+                </ul>
+
+            </section>
+        </article>
+
+        <article>
+            <h3>Tanyu</h3>
+            <figure>
+                <img src="images/img-tanyu.jpg" alt="Food from Tanyu">
+                <figcaption>
+                    Image of food from Tanyu that I recently went. Would recommend. Took this photo becuse I like taking food photos.
+                </figcaption>
+            </figure>
+
+        </article>
+
+        <article>
+            <h3>Soup</h3>
+            <figure>
+                <img src="images/img-cooking.jpg" alt="Homemade HaiDiLao style tomato soup">
+                <figcaption>
+                    This is a HaiDiLai inspired tomato soup I made at home, there's plenty of other food images too but this is one of them. Took it because I often take photos of all my cooking.
+                </figcaption> 
+            </figure>
+        </article>
+
+        <aside class="delay-1">
+            <h3>Random musings</h3>
+            <p>
+                I would honestly like to see what other students wrote for this in order to get their recommendations.
+                <br>
+                I tend to do a lot of home cooking so don't go out to eat as much to have many recommendations but I'm always up to go try out new places, it's a fun activity to do with friends.
+                <br>
+                Also to drive home the fact there's very little I wouldn't eat.
+                Below is a small list of "exotic" stuff I've had 
+            </p>
+            <ul>
+                <li>Durian (Yummy)</li>
+                <li>Centry Eggs (Tasty)</li>
+                <li>Stinky Tofu (One of my favs)</li>
+                <li>Snakes</li>
+                <li>Viewer discretion below</li>
+                <li id="spoilers">Crickets/Grasshoppers and other Bugs and Grubs</li>
+            </ul>
+        </aside>
+    </main>
+
+    <footer>Copyright 2026 Ruiyi Guo</footer>
+
+    <!-- JS script for toggling nav -->
+    <script>
+        const button = document.getElementById("navToggle");
+        const nav = document.getElementById("mainNav");
+
+        button.addEventListener("click", () => {
+            nav.classList.toggle("open");;
+        });
+    </script>
+</body>
+
+</html>

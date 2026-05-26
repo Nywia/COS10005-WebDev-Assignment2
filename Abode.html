@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Web Dev Assignment 1</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Web Dev Assignment 1">
+    <meta name="keywords" content="Assignment">
+    <meta name="author" content="Ruiyi Guo">
+    <link rel="stylesheet" href="style/desktop.css" type="text/css">
+    <link rel="stylesheet" href="style/mobile.css" type="text/css">
+</head>
+
+<body>
+    <header>
+        <h1>Where I live</h1>
+    </header>
+
+    <button id="navToggle">☰</button>
+
+    <nav id="mainNav" class="hidden">
+        <ul>
+            <li><a href="Home.html">Home Page</a></li>
+            <li><a href="Abode.html">Where I live</a></li>
+            <li><a href="Food.html">Food I like</a></li>
+            <li><a href="Activities.html">Stuff I do</a></li>
+            <li><a href="Video.html">Video</a></li>
+            <li><a href="Animations.html">Animations</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <article>
+            <h2>Where I live</h2>
+
+            <!-- Suburb -->
+            <section>
+                <h3>Suburb</h3>
+                <p>
+                    Near the CBD in Southbank. Rent is as high as the floor I'm living on. I would add more images but I'm lazy. 
+                    <br>
+                    Maybe as a personal project that doesn't require me to submit this.
+                </p>
+            </section>
+
+            <!-- Reasons -->
+            <section>
+                <h3>Reasons</h3>
+                <ol>
+                    <li>It is in the city</li>
+                    <li>Close to essential services</li>
+                    <li>Convenient</li>
+                    <li>Good view</li>
+                    <li>Mostly quiet</li>
+                    <li>Safe</li>
+                    <li>Amenities in building (Eg. Swimming pool)</li>
+                </ol>
+            </section>
+        </article>
+
+        <aside class="delay-1">
+            <h3>Random musings</h3>
+            <p>
+                Not too sure what to place here but adding content here because it is required in the assessment.
+            </p>
+        </aside>
+    </main>
+
+    <footer>Copyright 2026 Ruiyi Guo</footer>
+
+    <!-- JS script for toggling nav -->
+    <script>
+        const button = document.getElementById("navToggle");
+        const nav = document.getElementById("mainNav");
+
+        button.addEventListener("click", () => {
+            nav.classList.toggle("open");;
+        });
+    </script>
+</body>
+
+</html>
