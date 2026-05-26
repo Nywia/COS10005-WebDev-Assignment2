@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Assignment 2 - Register</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Restaurant page">
+    <meta name="keywords" content="Assignment, restaurants, reservations, food">
+    <meta name="author" content="Ruiyi Guo">
+
+    <link rel="stylesheet" href="Design/css/style.css" type="text/css">
+    <script src="Design/js/script.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Register Account</h1>
+    </header>
+
+    <!-- Navigation -->
+    <button id="navToggle">☰</button>
+
+    <nav id="mainNav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="restaurants.html">Restaurants</a></li>
+            <li><a href="recommendations.html">Recommendations</a></li>
+            <li><a href="reservations.html">Reservations</a></li>
+            <li><a href="register.html" class="active">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- Registration Form -->
+        <section class="register-form">
+            <h2>Create Account</h2>
+
+            <form method="POST" action="http://mercury.swin.edu.au/it000000/cos10005/surveytest.php">
+
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username">
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone">
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password">
+
+                <label for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password">
+
+                <fieldset>
+                    <legend>Gender</legend>
+
+                    <label>
+                        <input type="radio" name="gender" value="male">
+                        Male
+                    </label>
+
+                    <label>
+                        <input type="radio" name="gender" value="female">
+                        Female
+                    </label>
+
+                    <label>
+                        <input type="radio" name="gender" value="other">
+                        Other
+                    </label>
+                </fieldset>
+
+                <label for="diet">Dietary Preferences</label>
+                <select id="diet" name="diet">
+                    <option value="">Select Option</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="halal">Halal</option>
+                    <option value="none">None</option>
+                </select>
+
+                <label for="country">Country/Region</label>
+                <select id="country" name="country">
+                    <option value="">Select Country</option>
+                    <option value="australia">Australia</option>
+                    <option value="new_zealand">New Zealand</option>
+                </select>
+
+                <input type="submit" value="Register">
+                <input type="reset" value="Reset">
+            </form>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>&copy; 2026 Ruiyi Guo</footer>
+</body>
+
+</html>

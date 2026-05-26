@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Assignment 2 - Reservations</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Restaurant page">
+    <meta name="keywords" content="Assignment, restaurants, reservations, food">
+    <meta name="author" content="Ruiyi Guo">
+
+    <link rel="stylesheet" href="Design/css/style.css" type="text/css">
+    <script src="Design/js/script.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Restaurant Reservation</h1>
+    </header>
+
+    <!-- Navigation -->
+    <button id="navToggle">☰</button>
+
+    <nav id="mainNav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="restaurants.html">Restaurants</a></li>
+            <li><a href="recommendations.html">Recommendations</a></li>
+            <li><a href="reservations.html" class="active">Reservations</a></li>
+            <li><a href="register.html">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- Reservation Form -->
+        <section class="reservation-form">
+            <h2>Book a Table</h2>
+
+            <form method="POST" action="http://mercury.swin.edu.au/it000000/cos10005/surveytest.php">
+
+                <label for="fname">Full Name</label>
+                <input type="text" id="fname" name="fname">
+
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone">
+
+                <label for="restaurant">Restaurant Selection</label>
+                <select id="restaurant" name="restaurant">
+                    <option value="">Select Restaurant</option>
+                    <option value="restaurant1">Restaurant 1</option>
+                    <option value="restaurant2">Restaurant 2</option>
+                    <option value="restaurant3">Restaurant 3</option>
+                    <option value="restaurant4">Restaurant 4</option>
+                    <option value="restaurant5">Restaurant 5</option>
+                    <option value="restaurant6">Restaurant 6</option>
+                </select>
+
+                <label for="date">Reservation Date</label>
+                <input type="date" id="date" name="date">
+
+                <label for="time">Reservation Time</label>
+                <input type="time" id="time" name="time">
+
+                <label for="people">Number of People</label>
+                <input type="number" id="people" name="people" min="1">
+
+                <label for="requests">Special Requests</label>
+                <textarea id="requests" name="requests" rows="4" cols="30"></textarea>
+
+                <label for="deposit">Deposit Amount</label>
+                <input type="text" id="deposit" name="deposit" value="$00" readonly>
+
+                <fieldset>
+                    <legend>Deposit Method</legend>
+
+                    <label>
+                        <input type="radio" name="payment" value="voucher">
+                        Voucher
+                    </label>
+
+                    <label>
+                        <input type="radio" name="payment" value="online">
+                        Online Payment
+                    </label>
+                </fieldset>
+
+                <!-- Voucher Section -->
+                <section id="voucher-section">
+                    <label for="voucher">Voucher Code</label>
+                    <input type="text" id="voucher" name="voucher" maxlength="12">
+                </section>
+
+                <!-- Card Section -->
+                <section id="card-section">
+                    <label for="card">Credit Card Details</label>
+                    <input type="text" id="card" name="card">
+                </section>
+
+                <label for="billing-email">Billing Email Address</label>
+                <input type="email" id="billing-email" name="billing-email">
+
+                <label>
+                    <input type="checkbox" id="same-email">
+                    Same as email address
+                </label>
+
+                <input type="submit" value="Reserve Table">
+
+            </form>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>&copy; 2026 Ruiyi Guo</footer>
+</body>
+
+</html>
