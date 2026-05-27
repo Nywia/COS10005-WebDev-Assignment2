@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Assignment 2 - Bill Calculator</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Restaurant page">
+    <meta name="keywords" content="Assignment, restaurants, reservations, food">
+    <meta name="author" content="Ruiyi Guo">
+
+    <link rel="stylesheet" href="Design/css/style.css" type="text/css">
+    <script src="Design/js/script.js" defer></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Estimated Bill Calculator</h1>
+    </header>
+
+    <!-- Navigation -->
+    <button id="navToggle">☰</button>
+
+    <nav id="mainNav">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="restaurants.html">Restaurants</a></li>
+            <li><a href="recommendations.html">Recommendations</a></li>
+            <li><a href="reservations.html">Reservations</a></li>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="bill.html" class="active">Bill Calculator</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+
+        <section class="calculator-form">
+            <h2>Calculate Estimated Cost</h2>
+
+            <form>
+
+                <label for="calc-restaurant">Restaurant</label>
+                <select id="calc-restaurant">
+                    <option value="">Select Restaurant</option>
+                </select>
+
+                <label for="calc-dish">Dish</label>
+                <select id="calc-dish">
+                    <option value="">Select Dish</option>
+                </select>
+
+                <label for="calc-people">Number of People</label>
+                <input type="number" id="calc-people" min="1" value="1">
+
+                <label for="calc-total">Estimated Total</label>
+                <input type="text" id="calc-total" value="$0" readonly>
+
+            </form>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>&copy; 2026 Ruiyi Guo</footer>
+</body>
+
+</html>

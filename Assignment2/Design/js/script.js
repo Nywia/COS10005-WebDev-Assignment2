@@ -123,3 +123,76 @@ if (reservationForm) {
         }
     });
 }
+
+// ================== Bill Calculator ==================
+const restaurantSelect = document.getElementById("calc-restaurant");
+const dishSelect = document.getElementById("calc-dish");
+
+const peopleInput = document.getElementById("calc-people");
+const totalInput = document.getElementById("calc-total");
+
+if (restaurantSelect && dishSelect && peopleInput && totalInput) {
+
+    // Pull restaurant data from restaurants page
+    const restaurantData = {
+
+        "Restaurant 1": [
+            { dish: "Food 1", price: 20 },
+            { dish: "Food 2", price: 30 }
+        ],
+
+        "Restaurant 2": [
+            { dish: "Food 1", price: 25 },
+            { dish: "Food 2", price: 35 }
+        ],
+
+        "Restaurant 3": [
+            { dish: "Food 1", price: 40 },
+            { dish: "Food 2", price: 50 }
+        ]
+    };
+
+    // Load restaurants
+    for (const restaurant in restaurantData) {
+
+        const option = document.createElement("option");
+
+        option.value = restaurant;
+        option.textContent = restaurant;
+
+        restaurantSelect.appendChild(option);
+    }
+
+    // Load dishes
+    restaurantSelect.addEventListener("change", function () {
+
+        dishSelect.innerHTML = '<option value="">Select Dish</option>';
+
+        const dishes = restaurantData[this.value];
+
+        dishes.forEach(item => {
+
+            const option = document.createElement("option");
+
+            option.value = item.price;
+            option.textContent =
+                item.dish + " - $" + item.price;
+
+            dishSelect.appendChild(option);
+        });
+
+        updateTotal();
+    });
+
+    // Update total
+    function updateTotal() {
+
+        const price = Number(dishSelect.value) || 0;
+        const people = Number(peopleInput.value) || 0;
+
+        totalInput.value = "$" + (price * people);
+    }
+
+    dishSelect.addEventListener("change", updateTotal);
+    peopleInput.addEventListener("input", updateTotal);
+}
