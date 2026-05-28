@@ -61,6 +61,21 @@ if (reservationForm) {
     voucherSection.style.display = "none";
     cardSection.style.display = "none";
 
+    // Auto select restaurant
+    const restaurantField = document.getElementById("restaurant");
+
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    const selectedRestaurant =
+        params.get("restaurant") ||
+        localStorage.getItem("selectedRestaurant");
+
+    if (restaurantField && selectedRestaurant) {
+        restaurantField.value = selectedRestaurant;
+    }
+
     document.querySelectorAll('input[name="payment"]').forEach(option => {
         option.addEventListener("change", function () {
             voucherSection.style.display =
@@ -76,9 +91,7 @@ if (reservationForm) {
         if (this.checked) {
             billingEmail.value = emailInput.value;
             billingEmail.disabled = true;
-        }
-
-        else {
+        } else {
             billingEmail.disabled = false;
             billingEmail.value = "";
         }
@@ -123,6 +136,134 @@ if (reservationForm) {
         }
     });
 }
+
+// ================== Recommendation Page ==================
+const recommendationForm = document.querySelector(".recommendation-form form");
+const resultsContainer = document.getElementById("results");
+
+if (recommendationForm && resultsContainer) {
+
+    const restaurants = [
+
+        {
+            name: "Restaurant 1",
+            cuisine: "Cuisine Type",
+            price: "$00 - $00",
+            diet: "vegan",
+            budget: "low",
+            purpose: "family"
+        },
+
+        {
+            name: "Restaurant 2",
+            cuisine: "Cuisine Type",
+            price: "$00 - $00",
+            diet: "halal",
+            budget: "medium",
+            purpose: "business"
+        },
+
+        {
+            name: "Restaurant 3",
+            cuisine: "Cuisine Type",
+            price: "$00 - $00",
+            diet: "none",
+            budget: "high",
+            purpose: "date"
+        }
+    ];
+
+    recommendationForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        const diet = document.getElementById("diet").value;
+        const budget = document.getElementById("budget").value;
+        const purpose = document.getElementById("purpose").value;
+
+        resultsContainer.innerHTML = "";
+
+        const matches = restaurants.filter(restaurant =>
+
+            (diet === "" || restaurant.diet === diet) &&
+            (budget === "" || restaurant.budget === budget) &&
+            (purpose === "" || restaurant.purpose === purpose)
+        );
+
+        if (matches.length > 0) {
+
+            matches.forEach(restaurant => {
+
+                resultsContainer.innerHTML += `
+
+                <div class="recommendation-card">
+                    <h3>${restaurant.name}</h3>
+                    <p>${restaurant.cuisine}</p>
+                    <p>Price Range: ${restaurant.price}</p>
+
+                    <button class="select-btn"
+                        data-name="${restaurant.name}">
+                        Select
+                    </button>
+                </div>
+                `;
+            });
+
+            // ================== Recommendation Buttons ==================
+            document.querySelectorAll(".select-btn").forEach(button => {
+
+                button.addEventListener("click", function (event) {
+
+                    event.preventDefault();
+
+                    const restaurant = encodeURIComponent(
+                        this.dataset.name
+                    );
+
+                    localStorage.setItem(
+                        "selectedRestaurant",
+                        this.dataset.name
+                    );
+
+                    window.location.href =
+                        "reservations.html?restaurant=" + restaurant;
+                });
+            });
+        }
+
+        else {
+
+            resultsContainer.innerHTML = `
+
+            <div class="recommendation-card">
+                <h3>No Match Found</h3>
+            </div>
+            `;
+        }
+    });
+}
+
+// ================== Recommendation Buttons ==================
+document.querySelectorAll(".select-btn").forEach(button => {
+
+    button.addEventListener("click", function (event) {
+
+        event.preventDefault();
+
+        const restaurant = encodeURIComponent(
+            this.dataset.name
+        );
+
+        localStorage.setItem(
+            "selectedRestaurant",
+            this.dataset.name
+        );
+
+        window.location.href =
+            "reservations.html?restaurant=" + restaurant;
+    });
+});
+
 
 // ================== Bill Calculator ==================
 const restaurantSelect = document.getElementById("calc-restaurant");
