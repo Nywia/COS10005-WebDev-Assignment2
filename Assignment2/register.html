@@ -44,19 +44,19 @@
             <form method="POST" action="https://mercury.swin.edu.au/it000000/cos10005/regtest.php">
 
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username">
+                <input type="text" id="username" name="username" required>
 
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email">
+                <input type="email" id="email" name="email" required>
 
                 <label for="phone">Phone</label>
-                <input type="tel" id="phone" name="phone">
+                <input type="tel" id="phone" name="phone" required>
 
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password">
+                <input type="password" id="password" name="password" required>
 
                 <label for="confirm-password">Confirm Password</label>
-                <input type="password" id="confirm-password" name="confirm-password">
+                <input type="password" id="confirm-password" name="confirm-password" required>
 
                 <fieldset>
                     <legend>Gender</legend>
@@ -78,7 +78,7 @@
                 </fieldset>
 
                 <label for="diet">Dietary Preferences</label>
-                <select id="diet" name="diet">
+                <select id="diet" name="diet" required>
                     <option value="">Select Option</option>
                     <option value="vegan">Vegan</option>
                     <option value="halal">Halal</option>
@@ -86,7 +86,7 @@
                 </select>
 
                 <label for="country">Country/Region</label>
-                <select id="country" name="country">
+                <select id="country" name="country" required>
                     <option value="">Select Country</option>
                     <option value="australia">Australia</option>
                     <option value="new_zealand">New Zealand</option>

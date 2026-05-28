@@ -1,9 +1,10 @@
 // ================== RegEx Patterns ==================
 const usernamePattern = /^[A-Za-z0-9_]{5,}$/;
-const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-const phonePattern = /^[0-9]{10,}$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const registerPhonePattern = /^[0-9]{8,15}$/;
+const reservationPhonePattern = /^[0-9]{10,}$/;
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{10,}$/;
-const cardPattern = /^([0-9]{15}|[0-9]{16})$/;
+const cardPattern = /^([0-9]{15}|[0-9]{16})$/; // Amex 15 and Visa 16 handled together
 
 // ================== Helpers ==================
 const $ = (selector) => document.querySelector(selector);
@@ -60,7 +61,7 @@ on(registerForm, "submit", (event) => {
 
     if (!usernamePattern.test(username)) errors.push("Username must be at least 5 characters (letters, numbers, underscores).");
     if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
-    if (!phonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits."); // Updated error text
+    if (!registerPhonePattern.test(phone)) errors.push("Phone number must contain 8 to 15 digits."); // Updated error text
     if (!passwordPattern.test(password)) errors.push("Password must be 10+ characters with upper, lower, number, and special character.");
     if (password !== confirmPassword) errors.push("Passwords do not match.");
     if (!gender) errors.push("Please select a gender.");
@@ -110,11 +111,27 @@ if (reservationForm) {
         updateDepositValue();
     }
 
+    // Sets form default values
+    const now = new Date();
+    now.setHours(now.getHours() + 2);
+    
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    
+    $("#date").value = $("#date").min = new Date().toISOString().split("T")[0];
+    $("#time").value = `${hours}:${minutes}`;
+    $("#people").value = 1;
+
     // Payment method toggles
     $$('input[name="payment"]').forEach(option => {
         on(option, "change", (e) => {
-            voucherSection.style.display = e.target.value === "voucher" ? "block" : "none";
-            cardSection.style.display = e.target.value === "online" ? "block" : "none";
+            const isVoucher = e.target.value === "voucher";
+
+            voucherSection.style.display = isVoucher ? "block" : "none";
+            cardSection.style.display = isVoucher ? "none" : "block";
+
+            $("#voucher").required = isVoucher;
+            $("#card").required = !isVoucher;
         });
     });
 
@@ -142,12 +159,12 @@ if (reservationForm) {
 
         if (fullname === "") errors.push("Full name is required.");
         if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
-        if (!phonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits.");
+        if (!reservationPhonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits.");
         if (!restaurant) errors.push("Please select a restaurant.");
         if (!date) errors.push("Please select a reservation date.");
         else if (date < today) errors.push("Reservation date cannot be in the past.");
         if (!time) errors.push("Please select a reservation time.");
-        if (people <= 0 || people === "") errors.push("Number of people must be greater than 0.");
+        if (Number(people) <= 0) errors.push("Number of people must be greater than 0.");
         
         if (!payment) {
             errors.push("Please select a deposit payment method.");
