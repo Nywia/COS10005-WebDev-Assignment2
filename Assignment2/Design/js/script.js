@@ -12,15 +12,30 @@ const on = (element, event, handler) => {
     if (element) element.addEventListener(event, handler);
 };
 
-const displayErrors = (errors, event) => {
-    if (errors.length === 0) return;
-    event.preventDefault();
-    alert(errors.join("\n"));
+// Dynamic Error Display (Replacing alert)
+const displayErrors = (errors, event, formElement) => {
+    let errorContainer = formElement.querySelector('.error-box');
+    
+    if (!errorContainer) {
+        errorContainer = document.createElement('div');
+        errorContainer.className = 'error-box';
+        formElement.prepend(errorContainer);
+    }
+
+    if (errors.length === 0) {
+        errorContainer.style.display = "none";
+    } else {
+        event.preventDefault();
+        errorContainer.innerHTML = '<strong>Please fix the following errors:</strong><ul>' + 
+            errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
+        errorContainer.style.display = "block";
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 };
 
 const redirectWithRestaurant = (restaurantName) => {
     localStorage.setItem("selectedRestaurant", restaurantName);
-    window.location.href = `reservations.html?restaurant=${encodeURIComponent(restaurantName)}`;
+    window.location.href = `reservation.html?restaurant=${encodeURIComponent(restaurantName)}`;
 };
 
 // ================== Navigation ==================
@@ -40,15 +55,19 @@ on(registerForm, "submit", (event) => {
     const password = $("#password").value;
     const confirmPassword = $("#confirm-password").value;
     const gender = $('input[name="gender"]:checked');
+    const diet = $("#diet").value;
+    const country = $("#country").value;
 
-    if (!usernamePattern.test(username)) errors.push("Invalid username.");
-    if (!emailPattern.test(email)) errors.push("Invalid email.");
-    if (!phonePattern.test(phone)) errors.push("Invalid phone.");
-    if (!passwordPattern.test(password)) errors.push("Invalid password.");
+    if (!usernamePattern.test(username)) errors.push("Username must be at least 5 characters (letters, numbers, underscores).");
+    if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
+    if (!phonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits."); // Updated error text
+    if (!passwordPattern.test(password)) errors.push("Password must be 10+ characters with upper, lower, number, and special character.");
     if (password !== confirmPassword) errors.push("Passwords do not match.");
-    if (!gender) errors.push("Select gender.");
+    if (!gender) errors.push("Please select a gender.");
+    if (!diet) errors.push("Please select your dietary preferences.");
+    if (!country) errors.push("Please select a country/region.");
 
-    displayErrors(errors, event);
+    displayErrors(errors, event, registerForm);
 });
 
 // ================== Reservation Form ==================
@@ -84,8 +103,7 @@ if (reservationForm) {
 
     // Auto-select restaurant
     const params = new URLSearchParams(window.location.search);
-    const selectedRestaurant = 
-        params.get("restaurant") || localStorage.getItem("selectedRestaurant");
+    const selectedRestaurant = params.get("restaurant") || localStorage.getItem("selectedRestaurant");
     
     if (restaurantField && selectedRestaurant) {
         restaurantField.value = selectedRestaurant;
@@ -103,7 +121,7 @@ if (reservationForm) {
     // Email syncing helper
     const syncBillingEmail = () => {
         billingEmail.value = sameEmail.checked ? emailInput.value : "";
-        billingEmail.disabled = sameEmail.checked;
+        billingEmail.readOnly = sameEmail.checked;
     };
 
     on(sameEmail, "change", syncBillingEmail);
@@ -114,21 +132,30 @@ if (reservationForm) {
         const fullname = $("#fname").value.trim();
         const email = emailInput.value;
         const phone = $("#phone").value;
+        const restaurant = restaurantField.value;
         const date = $("#date").value;
+        const time = $("#time").value;
         const people = $("#people").value;
         const payment = $('input[name="payment"]:checked');
         const card = $("#card").value;
         const today = new Date().toISOString().split("T")[0];
 
-        if (fullname === "") errors.push("Full name required.");
-        if (!emailPattern.test(email)) errors.push("Invalid email.");
-        if (!phonePattern.test(phone)) errors.push("Invalid phone.");
-        if (date < today) errors.push("Invalid date.");
-        if (people <= 0) errors.push("People must be above 0.");
-        if (!payment) errors.push("Select payment method.");
-        if (payment?.value === "online" && !cardPattern.test(card)) errors.push("Invalid card.");
+        if (fullname === "") errors.push("Full name is required.");
+        if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
+        if (!phonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits.");
+        if (!restaurant) errors.push("Please select a restaurant.");
+        if (!date) errors.push("Please select a reservation date.");
+        else if (date < today) errors.push("Reservation date cannot be in the past.");
+        if (!time) errors.push("Please select a reservation time.");
+        if (people <= 0 || people === "") errors.push("Number of people must be greater than 0.");
+        
+        if (!payment) {
+            errors.push("Please select a deposit payment method.");
+        } else if (payment.value === "online" && !cardPattern.test(card)) {
+            errors.push("Invalid credit card format. Please enter 15 or 16 digits.");
+        }
 
-        displayErrors(errors, event);
+        displayErrors(errors, event, reservationForm);
     });
 }
 
@@ -146,9 +173,6 @@ if (recommendationForm && resultsContainer) {
         { name: "Ristorante Sei", cuisine: "Italian Seafood", price: "$50 - $110", diet: "none", budget: "high", purpose: "business" }
     ];
 
-    // Read elements embedded from static structure if necessary
-    const staticCards = $$(".recommendation-card");
-
     on(recommendationForm, "submit", (event) => {
         event.preventDefault();
 
@@ -156,14 +180,33 @@ if (recommendationForm && resultsContainer) {
         const budget = $("#budget").value;
         const purpose = $("#purpose").value;
 
-        const matches = restaurants.filter(restaurant =>
+        let exactMatches = restaurants.filter(restaurant =>
             (!diet || restaurant.diet === diet) &&
             (!budget || restaurant.budget === budget) &&
             (!purpose || restaurant.purpose === purpose)
         );
 
-        if (matches.length > 0) {
-            resultsContainer.innerHTML = matches.map(restaurant => `
+        let finalResults = exactMatches;
+
+        if (exactMatches.length === 0) {
+            // Calculate scores for partial matches
+            let partialMatches = restaurants.map(r => {
+                let score = 0;
+                if (diet && r.diet === diet) score++;
+                if (budget && r.budget === budget) score++;
+                if (purpose && r.purpose === purpose) score++;
+                return { ...r, score };
+            }).filter(r => r.score > 0).sort((a, b) => b.score - a.score);
+            
+            finalResults = partialMatches;
+        }
+
+        if (finalResults.length > 0) {
+            let html = exactMatches.length === 0 
+                ? `<h3>No exact matches, but here are some suggestions:</h3>` 
+                : ``;
+
+            html += finalResults.map(restaurant => `
                 <div class="recommendation-card">
                     <h3>${restaurant.name}</h3>
                     <p>${restaurant.cuisine}</p>
@@ -171,15 +214,17 @@ if (recommendationForm && resultsContainer) {
                     <button class="select-btn" data-name="${restaurant.name}">Select</button>
                 </div>
             `).join("");
+
+            resultsContainer.innerHTML = html;
         } else {
             resultsContainer.innerHTML = `
                 <div class="recommendation-card">
                     <h3>No Match Found</h3>
+                    <p>Try broadening your search criteria.</p>
                 </div>`;
         }
     });
 
-    // Event Delegation for dynamically created buttons 
     on(resultsContainer, "click", (event) => {
         if (event.target.classList.contains("select-btn")) {
             event.preventDefault();
@@ -189,11 +234,11 @@ if (recommendationForm && resultsContainer) {
 }
 
 // ================== Global Recommendation Buttons ==================
-$$(".select-btn:not(#results .select-btn)").forEach(btn => {
-    on(btn, "click", (event) => {
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
         event.preventDefault();
-        redirectWithRestaurant(event.currentTarget.dataset.name);
-    });
+        redirectWithRestaurant(event.target.dataset.name);
+    }
 });
 
 // ================== Bill Calculator ==================
@@ -212,19 +257,16 @@ if (restaurantSelect && dishSelect && peopleInput && totalInput) {
         "Ristorante Sei": [{ dish: "Lobster Ravioli", price: 32 }, { dish: "Grilled Seafood Platter", price: 45 }]
     };
 
-    // Load restaurants
     for (const restaurant in restaurantData) {
         restaurantSelect.appendChild(new Option(restaurant, restaurant));
     }
 
-    // Update total helper
     const updateTotal = () => {
         const price = Number(dishSelect.value) || 0;
         const people = Number(peopleInput.value) || 0;
         totalInput.value = `$${price * people}`;
     };
 
-    // Load dishes on restaurant change
     on(restaurantSelect, "change", (e) => {
         dishSelect.innerHTML = '<option value="">Select Dish</option>';
         const dishes = restaurantData[e.target.value] || [];

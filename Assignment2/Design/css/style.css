@@ -162,6 +162,26 @@ img {
     border-radius: 8px;
 }
 
+/* ================== Error Messages ================== */
+.error-box {
+    background: #ff4d4d;
+    color: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border: 1px solid #cc0000;
+}
+.error-box ul {
+    margin: 5px 0 0 0;
+    padding-left: 20px;
+    background: transparent;
+}
+.error-box li {
+    border: none;
+    padding: 2px 0;
+}
+
 /* ================== Tablet ================== */
 @media (min-width: 768px) {
 
