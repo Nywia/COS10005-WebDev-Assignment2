@@ -1,7 +1,7 @@
 // ================== RegEx Patterns ==================
 const usernamePattern = /^[A-Za-z0-9_]{5,}$/;
 const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-const phonePattern = /^[0-9]{8,15}$/;
+const phonePattern = /^[0-9]{10,}$/;
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{10,}$/;
 const cardPattern = /^([0-9]{15}|[0-9]{16})$/;
 
