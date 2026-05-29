@@ -11,12 +11,12 @@ body {
         radial-gradient(circle at top left, rgba(58,123,213,0.08), transparent 30%),
         radial-gradient(circle at bottom right, rgba(255,140,0,0.06), transparent 30%),
         #121212;
-    color: #e0e0e0;
+    /* Using Material Design's 87% opacity for primary text instead of harsh #fff or #e0e0e0 */
+    color: rgba(255, 255, 255, 0.87);
     line-height: 1.6;
     font-size: 16px;
     letter-spacing: 0.2px;
 }
-
 
 /* Hides the ugly default spinner arrows on number inputs so we can use our custom +/- buttons */
 input[type="number"] {
@@ -33,7 +33,7 @@ input[type="number"]::-webkit-inner-spin-button {
 /* ================== Header & Footer ================== */
 header {
     background: linear-gradient(90deg, #24324a, #2f4f7a);
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.87);
     text-align: center;
     box-shadow: 0 2px 12px rgba(0,0,0,0.35);
     padding: 32px 16px;
@@ -46,69 +46,102 @@ header h1 {
 
 footer {
     background: #2b3a55;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.87);
     text-align: center;
     padding: 16px;
 }
 
 /* ================== Navigation ================== */
-/* Mobile hamburger menu. Uses max-height for a smooth slide-down animation instead of just snapping open abruptly */
+.nav-container {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
 nav {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease;
+    transition: max-height 0.4s ease, background 0.3s ease;
     position: absolute;
+    top: 100%;
+    left: 0;
     width: 100%;
-    z-index: 10;
+    z-index: 1000;
 }
 
 nav.open {
     max-height: 500px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 nav ul {
     list-style: none;
     margin: 0;
     padding: 0;
-    background: rgba(15,15,15,0.92);
-    backdrop-filter: blur(10px);
+    /* Glassmorphism texture for depth */
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 nav li {
-    border-bottom: 1px solid #3a4d6b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 nav a {
     display: block;
     padding: 14px;
-    color: #e0e0e0;
+    color: rgba(255, 255, 255, 0.87);
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, padding 0.2s ease;
     font-weight: 500;
 }
 
 nav a:hover {
-    background: #3a4d6b;
+    background: rgba(255, 255, 255, 0.05);
+    padding-left: 20px; 
+    padding-right: 20px;
 }
 
 nav a.active {
     background: rgba(58,123,213,0.25);
+    border-left: 3px solid #3a7bd5;
 }
 
 #navToggle {
     width: 100%;
     border: none;
     padding: 12px;
-    background: rgba(15,15,15,0.92);
-    color: white;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    color: rgba(255, 255, 255, 0.87);
     font-size: 1.5em;
     cursor: pointer;
-    position: absolute;
-    z-index: 11;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    z-index: 1001;
+    box-shadow: none; 
+    transform: none;
+}
+
+#navToggle span {
+    /*  Need this because transforms only work on block or inline-block elements */
+    display: inline-block; 
+    transition: transform 0.2s ease;
+}
+
+#navToggle:hover span {
+    transform: scaleX(2);
+}
+
+/* Force the nav container to hover over the Hero section so the image stays exactly 100vh */
+body:has(#hero) .nav-container {
+    position: fixed;
+    left: 0;
+    width: 100%;
 }
 
 /* ================== Hero ================== */
-
 #hero {
     position: relative;
     height: 100vh;
@@ -143,12 +176,7 @@ nav a.active {
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(
-            to bottom,
-            rgba(0,0,0,0.55),
-            rgba(0,0,0,0.65)
-        );
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.75));
     z-index: 1;
 }
 
@@ -163,7 +191,7 @@ nav a.active {
 .hero-tag {
     text-transform: uppercase;
     letter-spacing: 3px;
-    color: #cccccc;
+    color: rgba(255, 255, 255, 0.6); /* 60% opacity secondary text */
     margin-bottom: 12px;
     font-size: 0.85rem;
 }
@@ -176,7 +204,7 @@ nav a.active {
 
 .hero-description {
     font-size: 1.1rem;
-    color: #d0d0d0;
+    color: rgba(255, 255, 255, 0.7);
     max-width: 650px;
     margin: 0 auto 30px;
 }
@@ -190,11 +218,12 @@ nav a.active {
 
 .secondary-btn {
     background: transparent;
-    border: 1px solid #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
 .secondary-btn:hover {
     background: rgba(255,255,255,0.1);
+    border-color: rgba(255, 255, 255, 0.87);
 }
 
 .scroll-indicator {
@@ -202,64 +231,47 @@ nav a.active {
     bottom: 25px;
     left: 50%;
     z-index: 2;
-    color: #ffffff;
-    opacity: 0.75;
+    color: rgba(255, 255, 255, 0.75);
     font-size: 1.5rem;
     animation: bounce 2.5s infinite;
     transform: translateX(-50%);
 }
 
 @keyframes bounce {
-    0%, 100% {
-        transform: translate(-50%, 0);
-    }
-
-    50% {
-        transform: translate(-50%, 16px);
-    }
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 16px); }
 }
 
-/* ================== Homepage Layout ================== */
-
-.homepage-main {
+/* ================== Main Content & Typography ================== */
+main, .homepage-main {
     width: 100%;
-    padding: 0;
+}
+
+/* Apply top padding to main ONLY if it does NOT contain the home page intro because otherwise it will push the hero content down and absolutely annoy me. 
+Random niche issue that keeps coming back */
+main:not(:has(#hero)) {
+    padding-top: 50px;
 }
 
 /* Content sections below hero */
 .homepage-content {
-    width: 80%;
+    width: 100%;
     margin: 0 auto;
     padding: 20px;
 }
 
-#services {
-    display: grid;
-    gap: 20px;
-}
-
-.service-card {
-    padding: 25px;
-}
-
-/* ================== Main Content & Typography ================== */
-main {
-    padding: 20px;
-    padding-top: 100px;
-}
-
 section {
     background: linear-gradient(145deg, #1f1f1f, #191919);
-    border: 1px solid #2f2f2f;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 4px 18px rgba(0,0,0,0.25);
     margin-bottom: 20px;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
 }
 
 h1, h2, h3 {
     font-family: "Poppins", sans-serif;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.87);
     letter-spacing: 0.3px;
 }
 
@@ -289,24 +301,34 @@ form {
 label {
     margin-top: 10px;
     margin-bottom: 5px;
+    color: rgba(255, 255, 255, 0.6); /* Secondary text depth */
 }
 
 input, select, textarea {
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 10px;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background: #2a2a2a;
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.87);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3a7bd5;
+    background: rgba(255, 255, 255, 0.07);
 }
 
 fieldset {
     margin: 15px 0;
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
 }
 
 legend {
     padding: 0 8px;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .budget-row,
@@ -330,20 +352,21 @@ input[type="submit"],
 input[type="reset"],
 button {
     background: #3a7bd5;
-    color: white;
+    color: rgba(255, 255, 255, 0.95);
     border: none;
-    padding: 10px;
+    padding: 12px 16px;
     cursor: pointer;
     border-radius: 8px;
     font-weight: 600;
-    transition: background 0.2s ease, transform 0.2s ease;
+    letter-spacing: 0.5px;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 input[type="submit"]:hover,
-input[type="reset"]:hover,
 button:hover {
     background: #2f5fa5;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 123, 213, 0.3);
 }
 
 .button-row {
@@ -351,127 +374,109 @@ button:hover {
     gap: 12px;
 }
 
-.button-row input[type="submit"] {
-    flex: 4;
-}
-
+.button-row input[type="submit"] { flex: 4; }
 .button-row input[type="reset"] {
     flex: 1;
-    background: #555;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .button-row input[type="reset"]:hover {
-    background: #666;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* ================== Layout Grids ================== */
-/* Shared logic for all primary card grids */
 #restaurant-container,
 #results,
-.quick-book-grid {
+.quick-book-grid,
+#services {
     display: grid;
     gap: 20px;
 }
 
-.quick-book-grid {
-    margin-top: 20px;
-}
+.quick-book-grid { margin-top: 20px; }
+.results-heading { grid-column: 1 / -1; margin-bottom: -5px; }
 
-.results-heading {
-    grid-column: 1 / -1;
-    margin-bottom: -5px;
-}
+/* ================== Shared Cards Architecture ================== */
 
-/* ================== Cards ================== */
-/* Base card styling */
+/* Primary Outer Cards (Restaurants, Quick Book, Services) */
 .restaurant-card,
-.recommendation-card,
-.service-card,
-.dish-card,
-.quick-book-card {
-    background: #2b2b2b;
-    border: 1px solid #333;
-    border-radius: 8px;
+.quick-book-card,
+.service-card {
+    background: linear-gradient(145deg, #1f1f1f, #191919);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-/* Specific card style overrides */
-.quick-book-card {
-    background: linear-gradient(145deg, #2a2a2a, #222);
-    padding: 24px;
+/* Secondary Inner Cards (Recommendations, Dishes) */
+.recommendation-card,
+.dish-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
-    border-color: #3a3a3a;
-    transition: transform 0.25s ease, border-color 0.25s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.quick-book-card:hover {
-    border-color: #3a7bd5;
+/* Card Hover Effects */
+.restaurant-card:hover,
+.recommendation-card:hover,
+.service-card:hover,
+.quick-book-card:hover,
+.dish-card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    border-color: rgba(58, 123, 213, 0.3);
 }
 
 .quick-book-card p {
-    color: #bbbbbb;
+    color: rgba(255, 255, 255, 0.6);
     margin-bottom: 20px;
 }
 
-.quick-book-card button {
-    width: 100%;
-}
+.quick-book-card button { width: 100%; }
+.dish-card { min-height: 100%; }
 
-.quick-book-card img {
+/* Shared image base properties */
+.restaurant-card img,
+.recommendation-card img,
+.quick-book-card img,
+.dish-card img {
     width: 100%;
-    height: 180px;
     object-fit: cover;
+    display: block;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.quick-book-content {
+/* Image heights */
+.restaurant-card img, .recommendation-card img { height: 220px; }
+.quick-book-card img { height: 180px; }
+.dish-card img { height: 160px; }
+
+/* Shared card content blocks */
+.restaurant-card-content,
+.recommendation-card-content,
+.quick-book-content,
+.dish-card-content {
     padding: 20px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-.quick-book-content button {
-    margin-top: auto;
-}
-
-.dish-card {
-    min-height: 100%;
-}
-
-/* Shared image base properties */
-.restaurant-card img,
-.recommendation-card img,
-.dish-card img {
-    width: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Image heights */
-.restaurant-card img,
-.recommendation-card img {
-    height: 220px;
-}
-
-.dish-card img {
-    height: 160px;
-}
-
-/* Shared card content blocks */
-.restaurant-card-content,
-.recommendation-card-content,
-.dish-card-content {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
 /* ================== Card Details ================== */
+.quick-book-content button { margin-top: auto; }
+.service-card { padding: 25px; }
+
 .card-details-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -480,7 +485,7 @@ button:hover {
 }
 
 .detail-box {
-    background: #202020;
+    background: rgba(0, 0, 0, 0.2);
     padding: 8px 12px;
     border-radius: 6px;
     border-left: 3px solid #3a7bd5;
@@ -490,7 +495,7 @@ button:hover {
 
 .detail-label {
     font-size: 0.75rem;
-    color: #888888;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 2px;
@@ -498,7 +503,7 @@ button:hover {
 
 .detail-value {
     font-size: 0.9rem;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.87);
     font-weight: bold;
 }
 
@@ -525,7 +530,7 @@ button:hover {
 }
 
 .dish-price {
-    color: #bdbdbd;
+    color: rgba(255, 255, 255, 0.6);
     margin: 0;
 }
 
@@ -534,16 +539,23 @@ button:hover {
     margin-top: auto;
     display: flex;
     align-items: stretch;
-    border: 1px solid #555;
-    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
     overflow: hidden;
 }
 
 .dish-controls button {
-    width: 40px;
+    width: 45px;
     height: auto;
     border-radius: 0;
     font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.dish-controls button:hover {
+    background: #3a7bd5;
+    color: white;
 }
 
 .dish-controls input {
@@ -551,20 +563,29 @@ button:hover {
     width: auto;
     text-align: center;
     border: none;
-    background: #2a2a2a;
+    border-radius: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.2);
+    font-weight: bold;
 }
 
 /* ================== Tablet ================== */
 @media (min-width: 768px) {
     /* Get rid of the hamburger menu and lay the nav out horizontally */
+    #navToggle { display: none; }
+    
+    nav { 
+        position: relative;
+        max-height: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
     nav ul {
         display: flex;
         justify-content: center;
     }
 
     nav li { border-bottom: none; }
-    #navToggle { display: none; }
-    nav { max-height: none; }
 
     #results,
     #restaurant-container,
@@ -575,9 +596,9 @@ button:hover {
 
 /* ================== Desktop ================== */
 @media (min-width: 1024px) {
-    /* Constrain the main wrapper so it doesn't look absurdly stretched on ultrawide monitors */
-    main {
-        width: 80%;
+    /* Increase the width so it doesn't look too squished at this width */
+    main, .homepage-content {
+        width: 95%;
         margin: 0 auto;
     }
 
@@ -586,13 +607,6 @@ button:hover {
     #restaurant-container,
     .quick-book-grid {
         grid-template-columns: repeat(3, 1fr);
-    }
-
-    /* Cool little hover lift effect for desktop users with mice */
-    .restaurant-card:hover,
-    .recommendation-card:hover,
-    .service-card:hover {
-        transform: translateY(-4px);
     }
 
     .homepage-grid {
@@ -612,7 +626,12 @@ button:hover {
         gap: 20px;
     }
 
-    #services h2 {
-        grid-column: 1 / -1;
+    #services h2 { grid-column: 1 / -1; }
+}
+
+@media (min-width: 1500px) {
+    main, .homepage-content {
+        width: 80%;
+        margin: 0 auto;
     }
 }
