@@ -9,82 +9,257 @@ Link:
 ----------------------------------------
 WEBSITE STRUCTURE
 ----------------------------------------
+
 index.html
-- Home page introducing the platform, core values, and quick booking links.
+- Home page introducing the platform, platform features, hero slideshow, and quick booking links.
 
 restaurants.html
-- Dynamic restaurant listing page that generates cards and menus from a JavaScript mock database.
+- Dynamic restaurant listing page that generates restaurant cards, menu previews, pricing, and descriptions directly from the JavaScript mock database.
 
 recommend.html
-- User preference form that filters and suggests restaurants based on dietary needs, purpose, and minimum/maximum budget. Features a fallback scoring system to suggest partial matches if no exact match is found.
+- User preference recommendation system allowing filtering by dietary requirements, dining purpose, and minimum/maximum budget.
+- Includes fallback fuzzy-scoring logic to recommend partial matches if no exact results exist.
 
 register.html
-- User registration form with strict input validation and dynamic dropdowns.
+- User registration form featuring strict regex validation, dynamic dietary dropdown generation, and password complexity enforcement.
 
 reservation.html
-- Reservation form featuring a dynamic deposit calculator, conditional payment options, and advanced date/time validation.
+- Reservation booking form with:
+  - Dynamic restaurant deposit calculation
+  - Conditional payment methods
+  - Voucher / credit card validation
+  - Auto-filled billing email synchronization
+  - Date and time restrictions preventing past reservations
 
 bill.html
-- Interactive bill calculator allowing users to select a restaurant, adjust dish quantities with custom +/- buttons, and see a real-time estimated total before passing their choice to the reservation page.
+- Interactive bill estimator allowing users to:
+  - Select a restaurant
+  - Dynamically render dishes
+  - Adjust quantities with custom +/- controls
+  - Calculate totals live in real time
+  - Transfer selected restaurant into the reservation system
 
 Design/css/style.css
-- External stylesheet for layout, typography, modern 2x2 dashboard grids, custom form inputs, and responsive media queries (mobile, tablet, desktop).
+- Central stylesheet handling:
+  - Responsive layouts
+  - Mobile navigation
+  - Dashboard-style grids
+  - Custom dropdown styling
+  - Card systems
+  - Form styling
+  - Animations and transitions
+  - Hero slideshow visuals
+  - Tablet/mobile media queries
 
 Design/js/script.js
-- Handles the mock database, dynamic HTML generation, navigation toggle, bill calculation, cross-page data passing (via localStorage and URL parameters), and robust form validation.
+- Main JavaScript logic controlling:
+  - Mock database processing
+  - Dynamic content generation
+  - Recommendation filtering
+  - Bill calculation
+  - Validation systems
+  - Cross-page navigation state
+  - Hero slideshow
+  - Custom dropdown menus
+  - Event delegation
+  - Dynamic form behavior
 
 ----------------------------------------
 JAVASCRIPT LOGIC & ARCHITECTURE (PLAIN ENGLISH)
 ----------------------------------------
-The JavaScript (script.js) is organized into distinct functional regions to handle data, user interface interactions, and form validation across multiple pages.
 
-1. Global Helpers & Configuration:
-- Custom selection functions (`$`, `$$`) and event listener wrappers are used to keep the code clean and prevent errors if a script runs on a page where an element doesn't exist.
-- Regex patterns are stored globally to ensure consistent formatting rules (e.g., emails, passwords, credit cards) across all forms.
-- Redirect functions use `localStorage` and URL parameters to "remember" a user's selected restaurant and carry that data over when navigating between the Recommendations, Bill Calculator, and Reservation pages.
-- A dynamic error handler injects and scrolls to a styled error box whenever form validation fails, replacing ugly alert popups.
+The JavaScript (script.js) is divided into modular functional regions to keep the things organized, reusable, and easier to maintain across multiple pages.
 
-2. Data Processing (Mock Database):
-- A central `restaurants` array acts as a mock database backend for the entire website. It stores all information including names, images, menus, pricing, and specific tags (cuisine, diet, budget, purpose).
-- Dropdown options (like Dietary Preferences) are dynamically extracted directly from this array using Sets to ensure the form options always perfectly match the available data without needing manual HTML updates.
+1. Helpers & Global Configuration:
+- Global regex patterns are centralized for validating usernames, emails, passwords, vouchers, phone numbers, and credit cards consistently across the application.
+- Utility helper functions (`$`, `$$`, `on`) simplify DOM selection and event handling while preventing null reference errors on pages where elements may not exist.
+- Shared utility helpers:
+  - `createEl()` dynamically creates reusable HTML elements.
+  - `toggleDisplay()` handles conditional visibility.
+  - `parsePriceRange()` extracts numeric values from restaurant pricing strings.
+  - `getCleanImageName()` dynamically maps restaurant names to image filenames.
+- Redirect helpers use both `localStorage` and encoded URL parameters to keep selected restaurants between pages while remaining compatible with local `file://` testing environments.
 
-3. Global UI & Navigation:
-- Handles the mobile hamburger menu toggle, smoothly expanding and collapsing the navigation.
-- Uses "Event Delegation" attached to the document body to listen for clicks on any "Book this" or "Calculate Bill" buttons. This ensures that even dynamically generated buttons (which didn't exist when the page first loaded) still function correctly.
+2. Dynamic Error Handling:
+- Instead of default browser alerts, validation errors are injected into a styled `.error-box`.
+- Errors automatically scroll into view to improve user experience and visibility.
+- Validation logic is centralized into reusable `displayErrors()` functionality.
 
-4. Dynamic Page Generation:
-- Restaurants Page: Loops through the mock database array and dynamically injects HTML layout blocks into the page, populating them with the correct images, details, and top two signature dishes.
-- Recommendations Page: 
-  - On initial load, randomly shuffles the database and displays 3 random picks.
-  - On search, it compares the user's inputs (diet, budget, purpose) against the database. 
-  - If a perfect match is found, it displays those cards. 
-  - Fallback Logic: If no perfect match exists, it uses a fuzzy-scoring system to rank restaurants based on how many criteria they met, ensuring the user always gets a helpful suggestion rather than a blank page.
+3. Mock Database System:
+- A large centralized `restaurants` array acts as the application's mock backend database.
+- Each restaurant stores:
+  - Cuisine
+  - Dishes
+  - Pricing
+  - Deposits
+  - Dietary categories
+  - Budget tags
+  - Dining purposes
+  - Descriptions
+- This structure eliminates repeated hardcoded HTML and ensures all pages stay synchronized automatically.
 
-5. Interactive Bill Calculator:
-- Listens for the user to select a restaurant from the dropdown and dynamically renders that specific restaurant's menu items as interactive cards.
-- Custom `+` and `-` buttons are handled via event delegation. When clicked, they update the hidden number input, prevent the quantity from dropping below zero, and immediately trigger a recalculation.
-- The `updateTotal` function loops through all dish inputs on the screen, multiplies the quantities by their respective prices, and updates the read-only total display.
+4. Dynamic Dropdown Generation:
+- Dietary and purpose dropdowns are automatically extracted using JavaScript `Set()` operations.
+- Dropdown values always remain synchronized with available restaurant data.
+- Labels are automatically formatted for cleaner UI presentation.
 
-6. Form Validation & Handling (Register & Reservation):
-- Form submissions are intercepted using `event.preventDefault()`. The script checks all fields against strict rules before allowing the form to process.
-- Registration validation ensures passwords meet complexity requirements, emails are formatted correctly, and passwords match.
-- Reservation validation includes dynamic features:
-  - Automatically updates the required deposit amount when a restaurant is selected.
-  - Enforces a minimum booking window by locking out times in the past.
-  - Dynamically shows/hides the Credit Card or Voucher input fields based on the chosen radio button, making the hidden fields no longer required for submission.
-  - Allows users to check a box to automatically copy their contact email into the billing email field, locking the field to prevent mismatches.
+5. Navigation & Global UI:
+- Mobile hamburger navigation toggles dynamically using class switching.
+- Event delegation is attached globally to handle:
+  - "Book this" buttons
+  - "Calculate Bill" buttons
+- This ensures dynamically generated content remains interactive even after page rendering.
+
+6. Custom Dropdown System:
+- Native HTML `<select>` menus are converted into fully custom-styled dropdown components.
+- Features include:
+  - Dynamic option syncing
+  - Open/close toggling
+  - Outside-click closing behavior
+  - Selected state highlighting
+- Native select values are still preserved underneath for accessibility and compatibility.
+
+7. Dynamic Homepage Features:
+- Hero slideshow:
+  - Randomly selects restaurants from the database
+  - Cycles images every 4 seconds
+  - Uses active class swapping for transitions
+- Quick booking section:
+  - Randomly generates featured restaurant cards
+  - Dynamically injects descriptions and booking buttons
+
+8. Dynamic Restaurant Page:
+- Restaurant cards are generated entirely from database content.
+- Each card displays:
+  - Cuisine
+  - Dietary tags
+  - Price ranges
+  - Deposits
+  - Signature dishes
+  - Descriptions
+- Buttons dynamically pass restaurant selections to other pages.
+
+9. Recommendation Engine:
+- Initial page load shows randomized restaurant suggestions.
+- Exact filtering compares:
+  - Dietary requirements
+  - Purpose
+  - Budget ranges
+- If no exact match exists:
+  - A fallback fuzzy-scoring system ranks restaurants based on matched criteria.
+  - Matching reasons are displayed to the user.
+- This prevents empty search results and improves usability.
+
+10. Reservation Form Logic:
+- Restaurants dynamically populate the reservation dropdown.
+- Deposit amounts automatically update based on restaurant selection.
+- Date logic:
+  - Prevents past bookings
+  - Automatically sets minimum selectable dates
+- Payment method logic:
+  - Dynamically toggles voucher or card fields
+  - Prevents hidden fields from interfering with validation
+- Billing email synchronization:
+  - Allows automatic mirroring from contact email
+  - Locks billing email field when synchronized
+
+11. Registration Validation:
+- Strict regex validation enforces:
+  - Minimum username length
+  - Valid email formatting
+  - Password complexity requirements
+  - Phone number rules
+- Password confirmation matching is enforced before submission.
+
+12. Interactive Bill Calculator:
+- Restaurant selection dynamically renders dish cards.
+- Quantity adjustment uses:
+  - Custom +/- buttons
+  - Manual input support
+- Real-time total calculation:
+  - Iterates through all dishes
+  - Multiplies quantities by prices
+  - Updates total instantly
+- Prevents negative quantities.
+- Selected restaurants can be transferred directly into the reservation workflow.
+
+13. Cross-Page State Management:
+- `localStorage` and URL query parameters work together to persist user selections between pages.
+- This allows seamless transitions from:
+  - Recommendations → Reservation
+  - Restaurants → Bill Calculator
+  - Bill Calculator → Reservation
+
+----------------------------------------
+DESIGN PHILOSOPHY & UI APPROACH
+----------------------------------------
+
+The interface design follows a modern card-based dashboard layout inspired by:
+- Google's Material Design principles
+- Modern food delivery and booking platforms
+- Responsive mobile-first design practices
+
+Key design goals included:
+- Clean visual hierarchy
+- Readable spacing and typography
+- Large interactive touch targets
+- Consistent card layouts
+- Reduced user friction during booking flows
+- Immediate visual feedback for interactions and validation
+
+The application prioritizes:
+- Dynamic rendering over static repetition
+- Reusable utility functions
+- Modular JavaScript architecture
+- Scalability for future backend integration
 
 ----------------------------------------
 KNOWN ISSUES OR LIMITATIONS
 ----------------------------------------
-- No Backend Database: All restaurant, menu, and pricing data is stored locally in a mock JavaScript array. No actual user accounts or reservations are saved permanently to a server.
-- LocalStorage Dependency: Passing selected restaurants between pages (e.g., from Recommendations to the Bill Calculator or Reservations) relies on `localStorage` and URL parameters. This might not function perfectly if a user has highly restrictive browser privacy settings blocking local storage. (This is why there is URL encoding)
 
+- No Backend Database:
+  - All restaurant, menu, and pricing data exists only within the JavaScript mock database.
+  - User accounts and reservations are not permanently stored.
+
+- LocalStorage Dependency:
+  - Cross-page restaurant persistence relies on `localStorage` and URL parameters.
+  - Extremely restrictive privacy/browser settings may partially affect functionality.
+
+- Image Dependency:
+  - Dynamic image loading depends on strict filename matching conventions.
+  - Fallback `.jpg → .jpeg` logic is implemented to reduce missing asset errors.
+  
 ----------------------------------------
 REFERENCES
 ----------------------------------------
 
-==================================== Restaurant Images ====================================
+Custom Dropdown Arrow SVG
+https://dev.to/snippflow/custom-select-arrow-using-css-2a2g
+https://www.w3.org/TR/SVG2/
+
+Google Material Design
+https://m3.material.io/
+
+Responsive Web Design Basics
+https://web.dev/responsive-web-design-basics/
+
+CSS Flexbox Guide
+https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+
+CSS Grid Guide
+https://css-tricks.com/snippets/css/complete-guide-grid/
+
+Google Fonts
+https://fonts.google.com/
+
+General UI/UX Inspiration
+https://dribbble.com/
+
+----------------------------------------
+IMAGE SOURCES
+----------------------------------------
+
+==================================== Restaurant ====================================
 [RistoranteUno.jpg](https://unsplash.com/photos/man-riding-on-boat-beside-restaurant-Uu5aXBI1oLk)
 [RestaurantDeux.jpg](https://unsplash.com/photos/people-sitting-on-chair-near-building-during-daytime-bOICdD-Gulk)
 [RestauranteTres.jpg](https://unsplash.com/photos/a-table-and-chairs-under-a-green-tent-1V-6QTortoU)
@@ -98,7 +273,7 @@ REFERENCES
 [SikdangSibil.jpeg](https://www.pexels.com/photo/seoul-night-street-scene-with-traditional-signs-34706322/)
 [RanAhanSip-Song.jpg](https://unsplash.com/photos/a-wooden-statue-of-a-person-holding-a-bird-bzx_qziexyE)
 
-==================================== Food Images ====================================
+==================================== Food ====================================
 [MargheritaPizza.jpg](https://unsplash.com/photos/pizza-on-chopping-board-MqT0asuoIcU)
 [SpaghettiCarbonara.jpg](https://unsplash.com/photos/a-white-plate-topped-with-spaghetti-and-bacon-fDLBn8X_IlU)
 [FettuccineAlfredo.jpg](https://unsplash.com/photos/creamy-fettuccine-pasta-with-herbs-and-pine-nuts-5_5tjqjKNAI)
@@ -190,9 +365,4 @@ REFERENCES
 [RedCurrywithDuck.jpg](https://unsplash.com/photos/close-up-of-succulent-roasted-duck-in-rich-sauce-pv-nOwZg2Y8)
 [MangoStickyRice.jpg](https://unsplash.com/photos/a-plate-of-food-with-rice-mango-and-sauce-bKrXKkPkhas)
 
-
-==================================== Other Images ====================================
-[CustomDropdownArrow]
-https://dev.to/snippflow/custom-select-arrow-using-css-2a2g
-https://www.w3.org/TR/SVG2/
 

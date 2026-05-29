@@ -675,8 +675,8 @@ if (recommendationForm && resultsContainer) {
 
             let matchesBudget = true;
             // The restaurant's lowest/highest price must be higher/lower user's min/max budget
-            if (minBudget !== null && rMin <= minBudget) matchesBudget = false;
-            if (maxBudget !== null && rMax >= maxBudget) matchesBudget = false;
+            if (minBudget !== null && rMin < minBudget) matchesBudget = false;
+            if (maxBudget !== null && rMax > maxBudget) matchesBudget = false;
 
             return matchesDiet && matchesPurpose && matchesBudget;
         });
