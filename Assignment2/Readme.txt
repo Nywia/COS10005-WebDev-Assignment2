@@ -189,3 +189,10 @@ REFERENCES
 [GarlicPepperPrawns.jpg](https://unsplash.com/photos/cooked-shrimps-on-blue-ceramic-plate-4LoGKVmUJsI)
 [RedCurrywithDuck.jpg](https://unsplash.com/photos/close-up-of-succulent-roasted-duck-in-rich-sauce-pv-nOwZg2Y8)
 [MangoStickyRice.jpg](https://unsplash.com/photos/a-plate-of-food-with-rice-mango-and-sauce-bKrXKkPkhas)
+
+
+==================================== Other Images ====================================
+[CustomDropdownArrow]
+https://dev.to/snippflow/custom-select-arrow-using-css-2a2g
+https://www.w3.org/TR/SVG2/
+

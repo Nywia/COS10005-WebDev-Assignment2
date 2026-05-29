@@ -19,6 +19,25 @@ const on = (element, event, handler) => {
     if (element) element.addEventListener(event, handler);
 };
 
+const createEl = (tag, className, text) => {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text) el.textContent = text;
+    return el;
+};
+
+// Extract numbers from price range like "$20 - $45" → [20, 45]
+// Centralising this avoids regex duplication and keeps filtering logic readable
+const parsePriceRange = (range) => {
+    const nums = range.match(/\d+/g);
+    return nums ? nums.map(n => parseInt(n, 10)) : [0, 0];
+};
+
+const toggleDisplay = (el, show, displayType = "block") => {
+    if (!el) return;
+    el.style.display = show ? displayType : "none";
+};
+
 // Strips out all whitespaces from names to match the local image files folder names dynamically
 const getCleanImageName = (name) => name.replace(/\s+/g, "");
 
@@ -328,7 +347,112 @@ const uniqueDiets = [...new Set(restaurants.map(r => r.diet))].filter(d => d !==
 const uniquePurposes = [...new Set(restaurants.map(r => r.purpose))].filter(p => p !== "none");
 
 // Capitalize the values to look nicer in the UI dropdowns
-const formatOptionLabel = (value) => { return value.charAt(0).toUpperCase() + value.slice(1); };
+const formatOptionLabel = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+//#endregion
+
+
+//#region ================== Global UI Elements ==================
+
+// ================== Navigation ==================
+// Handle mobile hamburger menu toggling
+const navToggleBtn = $("#navToggle");
+const mainNav = $("#mainNav");
+
+on(navToggleBtn, "click", () => mainNav.classList.toggle("open"));
+
+// ================== Global Select Buttons ==================
+// Uses event delegation on the document to catch clicks on any '.select-btn', 
+// ensuring dynamically injected buttons (like those on the recommendations page) still function properly
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
+        event.preventDefault();
+        redirectWithRestaurant(event.target.dataset.name);
+    }
+});
+
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("bill-btn")) {
+        event.preventDefault();
+        redirectToBill(event.target.dataset.name);
+    }
+});
+
+//#endregion
+
+
+//#region ================== Custom Dropdown Menu ==================
+
+const convertToCustomSelects = () => {
+    $$("select").forEach(nativeSelect => {
+        // Prevent duplicate wrappers if run multiple times
+        if (nativeSelect.nextElementSibling?.classList.contains("custom-select-wrapper")) return;
+
+        const wrapper = createEl("div", "custom-select-wrapper");
+        const trigger = createEl("div", "custom-select-trigger");
+        
+        // Helper to sync the visual text with the hidden select
+        const updateTriggerText = () => {
+            const selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
+            trigger.textContent = selectedOption ? selectedOption.text : "Select Option";
+        };
+        updateTriggerText();
+
+        const optionsContainer = createEl("div", "custom-options");
+
+        Array.from(nativeSelect.options).forEach(opt => {
+            if (!opt.value) return;
+
+            const customOpt = createEl("div", "custom-option", opt.text);
+
+            if (opt.selected) customOpt.classList.add("selected");
+
+            customOpt.addEventListener("click", () => {
+                nativeSelect.value = opt.value;
+                // Fire change event so the rest of the JS triggers normally
+                nativeSelect.dispatchEvent(new Event("change"));
+                
+                updateTriggerText();
+
+                optionsContainer.querySelectorAll(".custom-option")
+                    .forEach(c => c.classList.remove("selected"));
+
+                customOpt.classList.add("selected");
+                
+                optionsContainer.classList.remove("open");
+                trigger.classList.remove("open");
+            });
+
+            optionsContainer.appendChild(customOpt);
+        });
+
+        // Toggle dropdown open/close
+        trigger.addEventListener("click", (e) => {
+            e.stopPropagation(); // Stops the document click event from closing it instantly
+            
+            // Close any other open dropdowns on the page first
+            $$(".custom-options.open").forEach(openMenu => {
+                if (openMenu !== optionsContainer) {
+                    openMenu.classList.remove("open");
+                    openMenu.previousElementSibling.classList.remove("open");
+                }
+            });
+            
+            optionsContainer.classList.toggle("open");
+            trigger.classList.toggle("open");
+        });
+
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(optionsContainer);
+        nativeSelect.parentNode.insertBefore(wrapper, nativeSelect.nextSibling);
+    });
+
+    // If the user clicks anywhere outside the menu, close all open dropdowns
+    document.addEventListener("click", () => {
+        $$(".custom-options.open").forEach(menu => menu.classList.remove("open"));
+        $$(".custom-select-trigger.open").forEach(trig => trig.classList.remove("open"));
+    });
+};
 
 //#endregion
 
@@ -368,20 +492,17 @@ if (quickBookGrid) {
 
     const featuredRestaurants = [...restaurants].sort(() => 0.5 - Math.random()).slice(0, 3);
 
-    quickBookGrid.innerHTML = featuredRestaurants.map(restaurant => `
+    quickBookGrid.innerHTML = featuredRestaurants.map(r => `
         <article class="quick-book-card">
             <img 
-                src="Design/images/${getCleanImageName(restaurant.name)}.jpg"
+                src="Design/images/${getCleanImageName(r.name)}.jpg"
                 ${imageFallbackAttributes}
-                alt="${restaurant.name}"
+                alt="${r.name}"
             >
             <div class="quick-book-content">
-                <h3>${restaurant.name}</h3>
-                <p>${restaurant.description.slice(0, 110)}...</p>
-                <button 
-                    class="select-btn"
-                    data-name="${restaurant.name}"
-                >
+                <h3>${r.name}</h3>
+                <p>${r.description.slice(0, 110)}...</p>
+                <button class="select-btn" data-name="${r.name}">
                     Reserve Table
                 </button>
             </div>
@@ -392,82 +513,49 @@ if (quickBookGrid) {
 //#endregion
 
 
-//#region ================== Global UI Elements ==================
-
-// ================== Navigation ==================
-// Handle mobile hamburger menu toggling
-const navToggleBtn = $("#navToggle");
-const mainNav = $("#mainNav");
-
-on(navToggleBtn, "click", () => mainNav.classList.toggle("open"));
-
-// ================== Global Select Buttons ==================
-// Uses event delegation on the document to catch clicks on any '.select-btn', 
-// ensuring dynamically injected buttons (like those on the recommendations page) still function properly
-document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
-        event.preventDefault();
-        redirectWithRestaurant(event.target.dataset.name);
-    }
-});
-
-document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("bill-btn")) {
-        event.preventDefault();
-        redirectToBill(event.target.dataset.name);
-    }
-});
-
-//#endregion
-
-
 //#region ================== Page: Restaurants ==================
 
 // ================== Dynamic Restaurant Page ==================
 const restaurantContainer = $("#restaurant-container");
 
 if (restaurantContainer) {
-    // Injects standard HTML structures based on our cool mock database to prevent hardcoding errors
-    restaurantContainer.innerHTML = restaurants.map(restaurant => `
+    restaurantContainer.innerHTML = restaurants.map(r => `
         <article class="restaurant-card">
             <div class="restaurant-card-content">
-                <h2>${restaurant.name}</h2>
-                <img src="Design/images/${getCleanImageName(restaurant.name)}.jpg" ${imageFallbackAttributes} alt="${restaurant.name} image" style="margin-bottom: 15px;">
+                <h2>${r.name}</h2>
+                <img src="Design/images/${getCleanImageName(r.name)}.jpg" ${imageFallbackAttributes} alt="${r.name} image" style="margin-bottom: 15px;">
                 
                 <div class="card-details-grid">
                     <div class="detail-box">
                         <span class="detail-label">Cuisine</span>
-                        <span class="detail-value">${restaurant.cuisine}</span>
+                        <span class="detail-value">${r.cuisine}</span>
                     </div>
                     <div class="detail-box">
                         <span class="detail-label">Dietary</span>
-                        <span class="detail-value">${formatOptionLabel(restaurant.diet)}</span>
+                        <span class="detail-value">${formatOptionLabel(r.diet)}</span>
                     </div>
                     <div class="detail-box">
                         <span class="detail-label">Price Range</span>
-                        <span class="detail-value">${restaurant.priceRange}</span>
+                        <span class="detail-value">${r.priceRange}</span>
                     </div>
                     <div class="detail-box">
                         <span class="detail-label">Deposit</span>
-                        <span class="detail-value">$${restaurant.deposit}</span>
+                        <span class="detail-value">$${r.deposit}</span>
                     </div>
                 </div>
 
                 <p style="margin-top: 5px;"><strong>Signature Dishes:</strong></p>
                 <ul style="margin-top: 5px;">
-                    ${restaurant.dishes
-                        .slice(0, 2)
-                        .map(dish => `<li>${dish.name} - $${dish.price}</li>`)
-                        .join("")}
+                    ${r.dishes.slice(0, 2).map(d => `<li>${d.name} - $${d.price}</li>`).join("")}
                 </ul>
                 
-                <p>${restaurant.description}</p>
+                <p>${r.description}</p>
                 
                 <div class="card-buttons">
-                    <button type="button" class="bill-btn" data-name="${restaurant.name}">
+                    <button type="button" class="bill-btn" data-name="${r.name}">
                         Calculate Bill
                     </button>
-                    <button type="button" class="select-btn" data-name="${restaurant.name}">
+                    <button type="button" class="select-btn" data-name="${r.name}">
                         Book this
                     </button>
                 </div>
@@ -490,7 +578,6 @@ const recommendPurposeSelect = $(".recommendation-form #purpose");
 // Loop to generate options
 const populateDropdown = (selectElement, dataArray) => {
     if (!selectElement) return;
-    // Sets a clear placeholder-style option acting as the "None" state
     selectElement.innerHTML = `<option value="">Any / No Preference</option>`;
     dataArray.forEach(item => {
         selectElement.appendChild(new Option(formatOptionLabel(item), item));
@@ -506,60 +593,58 @@ const recommendationForm = $(".recommendation-form form");
 const resultsContainer = $("#results");
 
 if (recommendationForm && resultsContainer) {
-    
-    // Ensure UI consistency whether showing random picks or search results
-    const renderRecommendations = (restaurantList, headingHtml = "", showReasons = false) => {
-        if (restaurantList.length > 0) {
-            let html = headingHtml;
 
-            html += restaurantList.map(restaurant => `
-                <article class="recommendation-card">
-                    <img src="Design/images/${getCleanImageName(restaurant.name)}.jpg" ${imageFallbackAttributes} alt="${restaurant.name} image">
-
-                    <div class="recommendation-card-content">
-                        <h3>${restaurant.name}</h3>
-                        <div class="card-details-grid">
-                            <div class="detail-box">
-                                <span class="detail-label">Cuisine</span>
-                                <span class="detail-value">${restaurant.cuisine}</span>
-                            </div>
-                            <div class="detail-box">
-                                <span class="detail-label">Dietary</span>
-                                <span class="detail-value">${formatOptionLabel(restaurant.diet)}</span>
-                            </div>
-                            <div class="detail-box">
-                                <span class="detail-label">Purpose</span>
-                                <span class="detail-value">${formatOptionLabel(restaurant.purpose)}</span>
-                            </div>
-                            <div class="detail-box">
-                                <span class="detail-label">Price Range</span>
-                                <span class="detail-value">${restaurant.priceRange}</span>
-                            </div>
-                        </div>
-                        ${
-                            showReasons && restaurant.matches
-                            ? `<p><strong>Matched:</strong> ${restaurant.matches.join(", ")}</p>`
-                            : ""
-                        }
-                        <div class="card-buttons">
-                            <button type="button" class="bill-btn" data-name="${restaurant.name}">
-                                Calculate Bill
-                            </button>
-                            <button type="button" class="select-btn" data-name="${restaurant.name}">
-                                Book this
-                            </button>
-                        </div>
-                    </div>
-                </article>
-            `).join("");
-            resultsContainer.innerHTML = html;
-        } else {
+    const renderRecommendations = (list, headingHtml = "", showReasons = false) => {
+        if (!list.length) {
             resultsContainer.innerHTML = `
                 <div class="recommendation-card">
                     <h3>No Match Found</h3>
                     <p>Try broadening your search criteria.</p>
                 </div>`;
+            return;
         }
+
+        const cards = list.map(r => `
+            <article class="recommendation-card">
+                <img src="Design/images/${getCleanImageName(r.name)}.jpg" ${imageFallbackAttributes} alt="${r.name} image">
+
+                <div class="recommendation-card-content">
+                    <h3>${r.name}</h3>
+
+                    <div class="card-details-grid">
+                        <div class="detail-box">
+                            <span class="detail-label">Cuisine</span>
+                            <span class="detail-value">${r.cuisine}</span>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Dietary</span>
+                            <span class="detail-value">${formatOptionLabel(r.diet)}</span>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Purpose</span>
+                            <span class="detail-value">${formatOptionLabel(r.purpose)}</span>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Price Range</span>
+                            <span class="detail-value">${r.priceRange}</span>
+                        </div>
+                    </div>
+
+                    ${showReasons && r.matches ? `<p><strong>Matched:</strong> ${r.matches.join(", ")}</p>` : ""}
+
+                    <div class="card-buttons">
+                        <button type="button" class="bill-btn" data-name="${r.name}">
+                            Calculate Bill
+                        </button>
+                        <button type="button" class="select-btn" data-name="${r.name}">
+                            Book this
+                        </button>
+                    </div>
+                </div>
+            </article>
+        `).join("");
+
+        resultsContainer.innerHTML = headingHtml + cards;
     };
 
     // Copy the data so original isn't affected
@@ -577,17 +662,12 @@ if (recommendationForm && resultsContainer) {
         const purpose = $("#purpose").value;
         
         // Grab the new min and max inputs
-        const minBudgetStr = $("#min-budget").value;
-        const maxBudgetStr = $("#max-budget").value;
-        const minBudget = minBudgetStr ? parseInt(minBudgetStr, 10) : null;
-        const maxBudget = maxBudgetStr ? parseInt(maxBudgetStr, 10) : null;
-
+        const minBudget = $("#min-budget").value ? parseInt($("#min-budget").value, 10) : null;
+        const maxBudget = $("#max-budget").value ? parseInt($("#max-budget").value, 10) : null;
+        
         // Require all selected fields to match for a perfect recommendation
         const exactMatches = restaurants.filter(r => {
-            // Extract the numbers from the "$20 - $45" string using regex to actually compare them properly
-            const prices = r.priceRange.match(/\d+/g);
-            const rMin = parseInt(prices[0], 10);
-            const rMax = parseInt(prices[1], 10);
+            const [rMin, rMax] = parsePriceRange(r.priceRange);
 
             const matchesDiet = !diet || r.diet === diet;
             const matchesPurpose = !purpose || r.purpose === purpose;
@@ -605,21 +685,19 @@ if (recommendationForm && resultsContainer) {
 
         // Fallback scoring system: if no exact match exists, rank options by how many criteria they meet, basically a fuzzy search
         // This ensures the user always gets a helpful suggestion rather than a dead end
-        if (exactMatches.length === 0) {
-            finalResults = restaurants.map(restaurant => {
+        if (!exactMatches.length) {
+            finalResults = restaurants.map(r => {
                 let score = 0;
                 const matches = [];
-                
-                const prices = restaurant.priceRange.match(/\d+/g);
-                const rMin = parseInt(prices[0], 10);
-                const rMax = parseInt(prices[1], 10);
 
-                if (diet && restaurant.diet === diet) {
+                const [rMin, rMax] = parsePriceRange(r.priceRange);
+
+                if (diet && r.diet === diet) {
                     score++;
                     matches.push("Diet");
                 }
 
-                if (purpose && restaurant.purpose === purpose) {
+                if (purpose && r.purpose === purpose) {
                     score++;
                     matches.push("Purpose");
                 }
@@ -633,23 +711,18 @@ if (recommendationForm && resultsContainer) {
                     matches.push("Budget");
                 }
 
-                return { ...restaurant, score, matches };
+                return { ...r, score, matches };
             })
             .filter(r => r.score > 0)
             .sort((a, b) => b.score - a.score);
 
-            heading = `
-                <div class="results-heading">
-                    <h3>No exact matches, but here are some suggestions:</h3>
-                </div>
-            `;
+            heading = `<div class="results-heading"><h3>No exact matches, but here are some suggestions:</h3></div>`;
             renderRecommendations(finalResults, heading, true);
         } else {
             renderRecommendations(finalResults, heading);
         }
     });
 
-    // Local event delegation just for the results container
     on(resultsContainer, "click", (event) => {
         if (event.target.classList.contains("select-btn")) {
             event.preventDefault();
@@ -660,6 +733,8 @@ if (recommendationForm && resultsContainer) {
             redirectToBill(event.target.dataset.name);
         }
     });
+
+    convertToCustomSelects();
 }
 
 //#endregion
@@ -680,8 +755,8 @@ if (reservationForm) {
     const depositField = $("#deposit");
 
     // Hide payment fields on initial load until a method is selected
-    voucherSection.style.display = "none";
-    cardSection.style.display = "none";
+    toggleDisplay(voucherSection, false);
+    toggleDisplay(cardSection, false);
 
     // Populate options based on database, preventing (my) hardcoded errors
     restaurantField.innerHTML = `<option value="">Select Restaurant</option>`;
@@ -689,8 +764,8 @@ if (reservationForm) {
 
     // Automatically update the readonly deposit field when a restaurant is chosen
     const updateDepositValue = () => {
-        const selectedRestaurant = restaurants.find(r => r.name === restaurantField.value);
-        depositField.value = selectedRestaurant ? `$${selectedRestaurant.deposit.toFixed(2)}` : "$0.00";
+        const selected = restaurants.find(r => r.name === restaurantField.value);
+        depositField.value = selected ? `$${selected.deposit.toFixed(2)}` : "$0.00";
     };
     on(restaurantField, "change", updateDepositValue);
 
@@ -704,9 +779,9 @@ if (reservationForm) {
         localStorage.removeItem("selectedRestaurant");
     }
 
-    // Enforce a minimum booking window (2 hours from now) to prevent immediate or past bookings
     const now = new Date();
     now.setHours(now.getHours() + 2);
+
     const adjustedDate = now.toISOString().split("T")[0];
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
@@ -720,8 +795,9 @@ if (reservationForm) {
     $$('input[name="payment"]').forEach(option => {
         on(option, "change", (event) => {
             const isVoucher = event.target.value === "voucher";
-            voucherSection.style.display = isVoucher ? "block" : "none";
-            cardSection.style.display = isVoucher ? "none" : "block";
+            toggleDisplay(voucherSection, isVoucher);
+            toggleDisplay(cardSection, !isVoucher);
+
             $("#voucher").required = isVoucher;
             $("#card").required = !isVoucher;
         });
@@ -732,11 +808,13 @@ if (reservationForm) {
         billingEmail.value = sameEmail.checked ? emailInput.value : "";
         billingEmail.readOnly = sameEmail.checked;
     };
+
     on(sameEmail, "change", syncBillingEmail);
     on(emailInput, "input", () => { if (sameEmail.checked) syncBillingEmail(); });
 
     on(reservationForm, "submit", (event) => {
         const errors = [];
+
         const fullname = $("#fname").value.trim();
         const email = emailInput.value;
         const phone = $("#phone").value;
@@ -766,14 +844,18 @@ if (reservationForm) {
 
         displayErrors(errors, event, reservationForm);
     });
+
+    convertToCustomSelects();
 }
 
 // ================== Register Form ==================
+
 const registerForm = $(".register-form form");
 
 if (registerForm) {
     on(registerForm, "submit", (event) => {
         const errors = [];
+
         const username = $("#username").value;
         const email = $("#email").value;
         const phone = $("#phone").value;
@@ -794,6 +876,8 @@ if (registerForm) {
 
         displayErrors(errors, event, registerForm);
     });
+
+    convertToCustomSelects();
 }
 
 //#endregion
@@ -819,40 +903,35 @@ if (restaurantSelect && totalInput && dishList) {
             const price = Number(input.dataset.price);
             total += quantity * price;
         });
+
         totalInput.value = `$${total.toFixed(2)}`;
     };
 
     on(restaurantSelect, "change", (event) => {
         dishList.innerHTML = "";
-        const selectedRestaurant = restaurants.find(r => r.name === event.target.value);
 
-        if (!selectedRestaurant) {
-            reserveBtn.style.display = "none";
+        const selected = restaurants.find(r => r.name === event.target.value);
+
+        if (!selected) {
+            toggleDisplay(reserveBtn, false);
             updateTotal();
             return;
         }
 
-        reserveBtn.style.display = "block";
-        reserveBtn.dataset.name = selectedRestaurant.name;
+        toggleDisplay(reserveBtn, true);
+        reserveBtn.dataset.name = selected.name;
 
-        // Render the dishes out so the user can punch in numbers
-        dishList.innerHTML = selectedRestaurant.dishes.map(dish => `
+        dishList.innerHTML = selected.dishes.map(d => `
             <div class="dish-card">
-                <img src="Design/images/${getCleanImageName(dish.name)}.jpg" ${imageFallbackAttributes} alt="${dish.name}">
+                <img src="Design/images/${getCleanImageName(d.name)}.jpg" ${imageFallbackAttributes} alt="${d.name}">
                 <div class="dish-card-content">
                     <div class="dish-header">
-                        <h3>${dish.name}</h3>
-                        <p class="dish-price">$${dish.price}</p>
+                        <h3>${d.name}</h3>
+                        <p class="dish-price">$${d.price}</p>
                     </div>
                     <div class="dish-controls">
                         <button type="button" class="minus-btn">-</button>
-                        <input 
-                            type="number"
-                            class="dish-quantity"
-                            data-price="${dish.price}"
-                            value="0"
-                            min="0"
-                        >
+                        <input type="number" class="dish-quantity" data-price="${d.price}" value="0" min="0">
                         <button type="button" class="plus-btn">+</button>
                     </div>
                 </div>
@@ -875,7 +954,7 @@ if (restaurantSelect && totalInput && dishList) {
         localStorage.removeItem("selectedRestaurant");
     }
 
-    on(reserveBtn, "click", () => { redirectWithRestaurant(reserveBtn.dataset.name); });
+    on(reserveBtn, "click", () => redirectWithRestaurant(reserveBtn.dataset.name));
 
     // Handle the cool +/- buttons for dish quantities
     on(dishList, "click", (event) => {
@@ -884,13 +963,8 @@ if (restaurantSelect && totalInput && dishList) {
 
         let value = Number(input.value);
 
-        if (event.target.classList.contains("plus-btn")) {
-            value++;
-        }
-
-        if (event.target.classList.contains("minus-btn")) {
-            value = Math.max(0, value - 1); // Prevent negative food!
-        }
+        if (event.target.classList.contains("plus-btn")) value++;
+        if (event.target.classList.contains("minus-btn")) value = Math.max(0, value - 1);
 
         input.value = value;
         updateTotal();
@@ -898,10 +972,10 @@ if (restaurantSelect && totalInput && dishList) {
 
     // Just in case they type the number in manually instead of using buttons
     on(dishList, "input", (event) => {
-        if (event.target.classList.contains("dish-quantity")) {
-            updateTotal();
-        }
+        if (event.target.classList.contains("dish-quantity")) updateTotal();
     });
+
+    convertToCustomSelects();
 }
 
 //#endregion

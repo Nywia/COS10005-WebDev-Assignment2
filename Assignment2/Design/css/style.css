@@ -20,14 +20,14 @@ body {
 
 /* Hides the ugly default spinner arrows on number inputs so we can use our custom +/- buttons */
 input[type="number"] {
-  appearance: textfield;
+    appearance: textfield;
 }
 
 /* Chrome, Safari, and Edge for the spinner */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
+    appearance: none;
+    margin: 0;
 }
 
 /* ================== Header & Footer ================== */
@@ -59,14 +59,14 @@ footer {
 }
 
 nav {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease, background 0.3s ease;
     position: absolute;
     top: 100%;
     left: 0;
     width: 100%;
+    max-height: 0;
+    overflow: hidden;
     z-index: 1000;
+    transition: max-height 0.4s ease, background 0.3s ease;
 }
 
 nav.open {
@@ -93,13 +93,13 @@ nav a {
     padding: 14px;
     color: rgba(255, 255, 255, 0.87);
     text-decoration: none;
-    transition: background 0.2s ease, padding 0.2s ease;
     font-weight: 500;
+    transition: background 0.2s ease, padding 0.2s ease;
 }
 
 nav a:hover {
     background: rgba(255, 255, 255, 0.05);
-    padding-left: 20px; 
+    padding-left: 20px;
     padding-right: 20px;
 }
 
@@ -109,24 +109,24 @@ nav a.active {
 }
 
 #navToggle {
+    position: relative;
     width: 100%;
     border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding: 12px;
     background: rgba(18, 18, 18, 0.95);
     backdrop-filter: blur(10px);
     color: rgba(255, 255, 255, 0.87);
     font-size: 1.5em;
     cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    position: relative;
     z-index: 1001;
-    box-shadow: none; 
+    box-shadow: none;
     transform: none;
 }
 
 #navToggle span {
-    /*  Need this because transforms only work on block or inline-block elements */
-    display: inline-block; 
+    /* Need this because transforms only work on block or inline-block elements */
+    display: inline-block;
     transition: transform 0.2s ease;
 }
 
@@ -182,18 +182,18 @@ body:has(#hero) .nav-container {
 
 .hero-content {
     position: relative;
-    z-index: 2;
-    text-align: center;
     max-width: 800px;
     padding: 20px;
+    z-index: 2;
+    text-align: center;
 }
 
 .hero-tag {
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 3px;
     color: rgba(255, 255, 255, 0.6); /* 60% opacity secondary text */
     margin-bottom: 12px;
-    font-size: 0.85rem;
 }
 
 .hero-content h1 {
@@ -284,11 +284,11 @@ p, label, li {
 }
 
 #intro img {
+    width: 100%;
     height: 350px;
     object-fit: cover;
     margin-top: 15px;
     border-radius: 10px;
-    width: 100%;
 }
 
 /* ================== Forms ================== */
@@ -304,20 +304,115 @@ label {
     color: rgba(255, 255, 255, 0.6); /* Secondary text depth */
 }
 
+/* Base style for all form inputs */
 input, select, textarea {
     padding: 12px;
     margin-bottom: 10px;
-    background: rgba(255, 255, 255, 0.03);
+    background-color: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     color: rgba(255, 255, 255, 0.87);
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: #3a7bd5;
-    background: rgba(255, 255, 255, 0.07);
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Styling for Dropdown Select Menus */
+select {
+    display: none;
+}
+
+/* The wrapper that holds the custom dropdown */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 10px;
+    user-select: none;
+}
+
+/* The custom drop down menu input field */
+.custom-select-trigger {
+    display: block; /* Ensures block-level container math matches standard inputs */
+    width: 100%;
+    padding: 12px;
+    padding-right: 40px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.87);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: normal; /* Normalizes line-box heights between text inputs and divs */
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+}
+
+.custom-select-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+.custom-select-trigger.open {
+    border-color: #3a7bd5;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    /* Flips the arrow blue and upside down when the menu opens */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a7bd5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='18 15 12 9 6 15'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+/* The actual dropdown menu list */
+.custom-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #191919;
+    border: 1px solid #3a7bd5;
+    border-top: none;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 1005;
+    max-height: 250px;
+    overflow-y: auto;
+    
+    /* Smooth opening animation setup */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.custom-options.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Individual options inside the menu */
+.custom-option {
+    padding: 12px;
+    color: rgba(255, 255, 255, 0.87);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.1s ease;
+}
+
+.custom-option:last-child {
+    border-bottom: none;
+}
+
+.custom-option:hover, 
+.custom-option.selected {
+    background: rgba(58, 123, 213, 0.25);
+    color: #ffffff;
 }
 
 fieldset {
@@ -621,9 +716,7 @@ button:hover {
     #about, #users, #services { grid-column: 1 / -1; }
 
     #services {
-        display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
     }
 
     #services h2 { grid-column: 1 / -1; }
