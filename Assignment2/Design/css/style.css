@@ -1,4 +1,5 @@
 /* ================== Base Style ================== */
+/* Keeping padding and borders from blowing up element widths */
 * {
     box-sizing: border-box;
 }
@@ -11,12 +12,12 @@ body {
     line-height: 1.6;
 }
 
-/* Hides the ugly spinner */
+/* Hides the ugly default spinner arrows on number inputs so we can use our custom +/- buttons */
 input[type="number"] {
   appearance: textfield;
 }
 
-/* Chrome, Safari, Edge */
+/* Chrome, Safari, and Edge for the spinner */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   appearance: none;
@@ -33,10 +34,10 @@ footer {
 }
 
 /* ================== Navigation ================== */
+/* Mobile hamburger menu. Uses max-height for a smooth slide-down animation instead of just snapping open abruptly */
 nav {
     max-height: 0;
     overflow: hidden;
-
     transition: max-height 0.4s ease;
 }
 
@@ -60,7 +61,6 @@ nav a {
     padding: 14px;
     color: #e0e0e0;
     text-decoration: none;
-
     transition: background 0.2s ease;
 }
 
@@ -139,6 +139,7 @@ legend {
     padding: 0 8px;
 }
 
+/* Puts budget and date inputs side-by-side to save vertical space */
 .budget-row,
 .datetime-row {
     display: flex;
@@ -168,6 +169,7 @@ legend {
     gap: 12px;
 }
 
+/* Giving the submit button way more space so users don't click reset by accident */
 .button-row input[type="submit"] {
     flex: 3;
     background: #3a7bd5;
@@ -191,7 +193,6 @@ button {
     border: none;
     padding: 10px;
     cursor: pointer;
-
     transition: background 0.2s ease;
 }
 
@@ -208,31 +209,33 @@ img {
 }
 
 /* ================== Card Layout ================== */
+/* CSS Grid for responsive card layouts */
 #restaurant-container,
 #results {
     display: grid;
     gap: 20px;
 }
 
+/* Makes the heading span the entire width of the grid so it sits on top of the cards */
 .results-heading {
     grid-column: 1 / -1;
     margin-bottom: -5px;
 }
 
+/* Base card styling, sets up flex direction so we can push things to the bottom later */
 .restaurant-card,
 .recommendation-card,
 .service-card {
     background: #2b2b2b;
     border-radius: 8px;
     overflow: hidden;
-
     display: flex;
     flex-direction: column;
-
     transition: transform 0.2s ease;
 }
 
 /* ================== Card Images ================== */
+/* Crops images to the same height without squishing the aspect ratio */
 .restaurant-card img,
 .recommendation-card img {
     width: 100%;
@@ -242,16 +245,48 @@ img {
 }
 
 /* ================== Card Content ================== */
+/* Flex-grow ensures this container takes up remaining space, pushing the buttons down */
 .restaurant-card-content,
 .recommendation-card-content {
     padding: 15px;
-
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
+/* 2x2 dashboard layout for meta data */
+.card-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.detail-box {
+    background: #202020;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #3a7bd5;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    color: #888888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    color: #ffffff;
+    font-weight: bold;
+}
+
 /* ================== Card Buttons ================== */
+/* margin-top: auto forces the buttons to stick to the absolute bottom of the card */
 .card-buttons {
     display: flex;
     gap: 10px;
@@ -268,18 +303,17 @@ img {
     display: grid;
     gap: 20px;
     margin-top: 20px;
-
+    /* Automatically fits as many 350px cards as it can before wrapping to a new line */
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 }
 
+/* min-height ensures all dish cards line up perfectly even if the text lengths differ */
 .dish-card {
     background: #2b2b2b;
     border-radius: 8px;
     overflow: hidden;
-
     display: flex;
     flex-direction: column;
-
     min-height: 100%;
 }
 
@@ -292,7 +326,6 @@ img {
 
 .dish-card-content {
     padding: 15px;
-
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -312,15 +345,12 @@ img {
     margin: 0;
 }
 
+/* Removing all gaps and borders to make the input and buttons look like one solid UI component */
 .dish-controls {
     margin-top: auto;
-
     display: flex;
     align-items: stretch;
-
-    /* remove gaps so it becomes one unit */
     gap: 0;
-
     border: 1px solid #555;
     border-radius: 6px;
     overflow: hidden;
@@ -329,25 +359,19 @@ img {
 .dish-controls button {
     width: 40px;
     height: auto;
-
     border: none;
     border-radius: 0;
-
     margin: 0;
-
     background: #3a7bd5;
     color: white;
-
     font-size: 1.2rem;
 }
 
 .dish-controls input {
     flex: 1;
     width: auto;
-
     text-align: center;
     margin: 0;
-
     border: none;
     background: #2a2a2a;
     color: #fff;
@@ -359,7 +383,7 @@ img {
 
 /* ================== Tablet ================== */
 @media (min-width: 768px) {
-
+    /* Get rid of the hamburger menu and lay the nav out horizontally */
     nav ul {
         display: flex;
         justify-content: center;
@@ -373,10 +397,12 @@ img {
         display: none;
     }
 
+    /* Remove the mobile slide-down height restriction */
     nav {
         max-height: none;
     }
 
+    /* Switch to a 2-column layout */
     #restaurant-container,
     #results {
         grid-template-columns: repeat(2, 1fr);
@@ -385,17 +411,19 @@ img {
 
 /* ================== Desktop ================== */
 @media (min-width: 1024px) {
-
+    /* Constrain the main wrapper so it doesn't look absurdly stretched on ultrawide monitors */
     main {
         width: 80%;
         margin: 0 auto;
     }
 
+    /* Switch to a 3-column layout */
     #restaurant-container,
     #results {
         grid-template-columns: repeat(3, 1fr);
     }
 
+    /* Cool little hover lift effect for desktop users with mice */
     .restaurant-card:hover,
     .recommendation-card:hover,
     .service-card:hover {

@@ -1,4 +1,7 @@
+//#region ================== Helpers & Configuration ==================
+
 // ================== RegEx Patterns ==================
+// Add more patterns here later if we ever need to validate things like postcodes or specific names
 const usernamePattern = /^[A-Za-z0-9_]{5,}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const registerPhonePattern = /^[0-9]{8,15}$/;
@@ -11,160 +14,15 @@ const cardPattern = /^([0-9]{15}|[0-9]{16})$/; // Amex 15 and Visa 16 handled to
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
+// A clean little wrapper for event listeners to avoid annoying null errors if the element isn't on the page
 const on = (element, event, handler) => {
     if (element) element.addEventListener(event, handler);
 };
 
-// ================== Shared Restaurant Data ==================
-// Basically a mock database to keep content consistent across all pages without needing to make changes for every page every time something needs to be changed 
-const restaurants = [
-    {
-        name: "Ristorante Uno",
-        cuisine: "Italian",
-        image: "Design/images/restaurant1.png",
-        dishes: [
-            { name: "Margherita Pizza", price: 18 },
-            { name: "Spaghetti Carbonara", price: 22 },
-            { name: "Spaghetti Carbonara2", price: 23 },
-            { name: "Spaghetti Carbonara3", price: 24 },
-            { name: "Spaghetti Carbonara4", price: 25 },
-            { name: "Spaghetti Carbonara5", price: 26 },
-            { name: "Spaghetti Carbonara6", price: 27 },
-            { name: "Spaghetti Carbonara6", price: 27 },
-            { name: "Spaghetti Carbonara6", price: 27 },
-            { name: "Spaghetti Carbonara6", price: 27 },
-            { name: "Spaghetti Carbonara6", price: 27 },
-        ],
-        deposit: 10,
-        priceRange: "$20 - $45",
-        description: "This establishment offers traditional Italian meals prepared with fresh ingredients. The venue features a classic dining setup suitable for family gatherings and casual dinners. Customers can select from a range of pasta dishes, wood-fired pizzas, and classic desserts. Standard seating is available daily, and booking in advance is highly recommended for weekend evenings.",
-        diet: "none",
-        budget: "medium",
-        purpose: "family"
-    },
-
-    {
-        name: "Restaurant Deux",
-        cuisine: "French",
-        image: "Design/images/restaurant2.png",
-        dishes: [
-            { name: "Steak Frites", price: 35 },
-            { name: "Crème Brûlée", price: 12 }
-        ],
-        deposit: 25,
-        priceRange: "$40 - $90",
-        description: "A fine dining option focusing on traditional French culinary techniques. The menu includes classic options like steak, seafood, and rich desserts. The environment is formal and well-suited for special occasions, couples, and professional business dinners. High-quality ingredients are utilized across all dishes, and an extensive beverage list is provided for guests.",
-        diet: "none",
-        budget: "high",
-        purpose: "date"
-    },
-
-    {
-        name: "Restaurante Tres",
-        cuisine: "Spanish",
-        image: "Design/images/restaurant3.png",
-        dishes: [
-            { name: "Seafood Paella", price: 28 },
-            { name: "Garlic Prawns Tapas", price: 14 }
-        ],
-        deposit: 15,
-        priceRange: "$25 - $60",
-        description: "This venue serves a variety of traditional Spanish tapas and sharing platters. It provides a lively atmosphere that accommodates both small and large dining groups easily. The menu highlights regional seafood variations, rice dishes, and traditional finger foods. It represents an excellent option for sharing meals among friends, family members, or traveling tourists.",
-        diet: "none",
-        budget: "medium",
-        purpose: "family"
-    },
-
-    {
-        name: "Restaurant Vier",
-        cuisine: "German",
-        image: "Design/images/restaurant1.png",
-        dishes: [
-            { name: "Chicken Schnitzel", price: 24 },
-            { name: "Apple Strudel", price: 10 }
-        ],
-        deposit: 10,
-        priceRange: "$20 - $50",
-        description: "A casual dining spot offering hearty German meals and classic comfort food options. The interior uses simple wood styling to replicate a traditional European tavern layout. Portions are large and designed to satisfy general dining requirements. Families and tourist groups frequently visit this location due to the relaxed environment and straightforward menu options.",
-        diet: "vegan",
-        budget: "medium",
-        purpose: "family"
-    },
-
-    {
-        name: "Restaurante Cinco",
-        cuisine: "Mexican",
-        image: "Design/images/restaurant5.png",
-        dishes: [
-            { name: "Beef Tacos Trio", price: 16 },
-            { name: "Chicken Enchiladas", price: 19 }
-        ],
-        deposit: 0,
-        priceRange: "$15 - $35",
-        description: "This establishment offers fast, vibrant Mexican street food options. No upfront deposit is required to secure a table, making it a highly accessible choice for casual dining. The menu consists of customizable tacos, burritos, and shared appetizers. The bright decor makes it appealing to younger crowds, students, and professionals seeking quick lunch options.",
-        diet: "halal",
-        budget: "low",
-        purpose: "business"
-    },
-
-    {
-        name: "Ristorante Sei",
-        cuisine: "Italian Seafood",
-        image: "Design/images/restaurant6.png",
-        dishes: [
-            { name: "Lobster Ravioli", price: 32 },
-            { name: "Grilled Seafood Platter", price: 45 }
-        ],
-        deposit: 30,
-        priceRange: "$50 - $110",
-        description: "A premium dining establishment focusing heavily on upscale Italian seafood recipes. Fresh catches are prepared daily by the culinary team, ensuring premium standards. The venue overlooks scenic views, creating a premium atmosphere tailored for formal events, romantic dates, and corporate dinners. Premium pricing applies, and reservations must be completed well in advance.",
-        diet: "none",
-        budget: "high",
-        purpose: "business"
-    }
-];
-
-// ================== Dynamic Select Data ==================
-// Pulls unique values directly from the mock database instead of hardcoding form options everywhere
-const uniqueDiets = [...new Set(restaurants.map(r => r.diet))];
-const uniquePurposes = [...new Set(restaurants.map(r => r.purpose))];
-
-// Captalize the values to look nicer
-const formatOptionLabel = (value) => {return value.charAt(0).toUpperCase() + value.slice(1);};
-
-// ================== Dynamic Error Display ==================
-// Injects a visually cooler error box than the ugly alert notification  
-// and scrolling it into view so the user immediately notices
-const displayErrors = (errors, event, formElement) => {
-    let errorContainer = formElement.querySelector(".error-box");
-
-    if (!errorContainer) {
-        errorContainer = document.createElement("div");
-        errorContainer.className = "error-box";
-        formElement.prepend(errorContainer);
-    }
-
-    if (errors.length === 0) {
-        errorContainer.style.display = "none";
-    } else {
-        event.preventDefault();
-        errorContainer.innerHTML = `<strong>Please fix the following errors:</strong><ul>${errors.map(error => `<li>${error}</li>`).join("")}</ul>`;
-        errorContainer.style.display = "block";
-        errorContainer.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-};
-
-// ================== Navigation ==================
-// Handle mobile hamburger menu toggling
-const navToggleBtn = $("#navToggle");
-const mainNav = $("#mainNav");
-
-on(navToggleBtn, "click", () => mainNav.classList.toggle("open"));
-
-// ================== Redirect Helper ==================
+// ================== Redirect Helpers ==================
 // Uses localStorage to temporarily hold the user's choice across page loads, 
-// allowing the reservation form to auto-select the chosen restaurant
-// also encodes the data into the url because localStorage doesn't work properly
+// allowing the reservation form to auto-select the chosen restaurant.
+// Also encodes the data into the url because localStorage doesn't work properly
 // when testing locally using file:// 
 const redirectWithRestaurant = (restaurantName) => {
     localStorage.setItem("selectedRestaurant", restaurantName);
@@ -176,6 +34,332 @@ const redirectToBill = (restaurantName) => {
     window.location.href = `bill.html?restaurant=${encodeURIComponent(restaurantName)}`;
 };
 
+// ================== Dynamic Error Display ==================
+// Injects a visually cooler error box than the ugly alert notification  
+// and scrolling it into view so the user immediately notices
+const displayErrors = (errors, event, formElement) => {
+    let errorContainer = formElement.querySelector(".error-box");
+
+    // Create the error box if it doesn't exist yet
+    if (!errorContainer) {
+        errorContainer = document.createElement("div");
+        errorContainer.className = "error-box";
+        formElement.prepend(errorContainer);
+    }
+
+    if (errors.length === 0) {
+        // Hide it if everything is good to go
+        errorContainer.style.display = "none";
+    } else {
+        // Stop the form from submitting!
+        event.preventDefault();
+        errorContainer.innerHTML = `<strong>Please fix the following errors:</strong><ul>${errors.map(error => `<li>${error}</li>`).join("")}</ul>`;
+        errorContainer.style.display = "block";
+        errorContainer.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+};
+
+//#endregion 
+
+
+//#region ================== Data Processing (Mock Database) ==================
+
+// ================== Shared Restaurant Data ==================
+// Basically a mock database to keep content consistent across all pages without needing to make changes for every page every time something needs to be changed 
+const restaurants = [
+    {
+        name: "Ristorante Uno",
+        cuisine: "Italian",
+        image: "Design/images/restaurant1.png",
+        dishes: [
+            { name: "Margherita Pizza", price: 18 },
+            { name: "Spaghetti Carbonara", price: 22 },
+            { name: "Fettuccine Alfredo", price: 20 },
+            { name: "Lasagna Classica", price: 24 },
+            { name: "Risotto al Funghi", price: 23 },
+            { name: "Bruschetta Toast", price: 11 },
+            { name: "Minestrone Soup", price: 10 },
+            { name: "Tiramisu Dessert", price: 12 }
+        ],
+        deposit: 10,
+        priceRange: "$20 - $45",
+        description: "This establishment offers traditional Italian meals prepared with fresh ingredients. The venue features a classic dining setup suitable for family gatherings and casual dinners. Customers can select from a range of pasta dishes, wood-fired pizzas, and classic desserts. Standard seating is available daily, and booking in advance is highly recommended for weekend evenings.",
+        diet: "vegetarian",
+        budget: "medium",
+        purpose: "casual"
+    },
+    {
+        name: "Restaurant Deux",
+        cuisine: "French",
+        image: "Design/images/restaurant2.png",
+        dishes: [
+            { name: "Steak Frites", price: 35 },
+            { name: "Coq au Vin", price: 29 },
+            { name: "Escargots de Bourgogne", price: 18 },
+            { name: "Foie Gras Terrine", price: 26 },
+            { name: "Crème Brûlée", price: 12 }
+        ],
+        deposit: 25,
+        priceRange: "$40 - $90",
+        description: "A fine dining option focusing on traditional French culinary techniques. The menu includes classic options like steak, seafood, and rich desserts. The environment is formal and well-suited for special occasions, couples, and professional business dinners. High-quality ingredients are utilized across all dishes, and an extensive beverage list is provided for guests.",
+        diet: "none",
+        budget: "high",
+        purpose: "date"
+    },
+    {
+        name: "Restaurante Tres",
+        cuisine: "Spanish",
+        image: "Design/images/restaurant3.png",
+        dishes: [
+            { name: "Seafood Paella", price: 28 },
+            { name: "Garlic Prawns Tapas", price: 14 },
+            { name: "Patatas Bravas", price: 10 },
+            { name: "Jamón Ibérico Platter", price: 22 },
+            { name: "Calamari a la Romana", price: 13 },
+            { name: "Tortilla Española", price: 9 },
+            { name: "Croquetas de Jamón", price: 11 },
+            { name: "Pimientos de Padrón", price: 12 },
+            { name: "Churros con Chocolate", price: 9 }
+        ],
+        deposit: 15,
+        priceRange: "$25 - $60",
+        description: "This venue serves a variety of traditional Spanish tapas and sharing platters. It provides a lively atmosphere that accommodates both small and large dining groups easily. The menu highlights regional seafood variations, rice dishes, and traditional finger foods. It represents an excellent option for sharing meals among friends, family members, or traveling tourists.",
+        diet: "pescatarian",
+        budget: "medium",
+        purpose: "night-out"
+    },
+    {
+        name: "Restaurant Vier",
+        cuisine: "German",
+        image: "Design/images/restaurant1.png",
+        dishes: [
+            { name: "Chicken Schnitzel", price: 24 },
+            { name: "Bratwurst Platter", price: 19 },
+            { name: "Apple Strudel", price: 10 }
+        ],
+        deposit: 10,
+        priceRange: "$20 - $50",
+        description: "A casual dining spot offering hearty German meals and classic comfort food options. The interior uses simple wood styling to replicate a traditional European tavern layout. Portions are large and designed to satisfy general dining requirements. Families and tourist groups frequently visit this location due to the relaxed environment and straightforward menu options.",
+        diet: "none",
+        budget: "medium",
+        purpose: "casual"
+    },
+    {
+        name: "Restaurante Cinco",
+        cuisine: "Mexican",
+        image: "Design/images/restaurant5.png",
+        dishes: [
+            { name: "Beef Tacos Trio", price: 16 },
+            { name: "Chicken Enchiladas", price: 19 },
+            { name: "Loaded Nachos Sharing", price: 15 },
+            { name: "Pork Carnitas Burrito", price: 17 },
+            { name: "Guacamole and Chips", price: 11 },
+            { name: "Churros Basket", price: 8 }
+        ],
+        deposit: 0,
+        priceRange: "$15 - $35",
+        description: "This establishment offers fast, vibrant Mexican street food options. No upfront deposit is required to secure a table, making it a highly accessible choice for casual dining. The menu consists of customizable tacos, burritos, and shared appetizers. The bright decor makes it appealing to younger crowds, students, and professionals seeking quick lunch options.",
+        diet: "gluten-free",
+        budget: "low",
+        purpose: "solo"
+    },
+    {
+        name: "Ristorante Sei",
+        cuisine: "Italian Seafood",
+        image: "Design/images/restaurant6.png",
+        dishes: [
+            { name: "Lobster Ravioli", price: 32 },
+            { name: "Grilled Seafood Platter", price: 45 },
+            { name: "Calamari Fritti", price: 19 },
+            { name: "Oysters Rockefeller", price: 28 },
+            { name: "Panettone Bread Pudding", price: 14 }
+        ],
+        deposit: 30,
+        priceRange: "$50 - $110",
+        description: "A premium dining establishment focusing heavily on upscale Italian seafood recipes. Fresh catches are prepared daily by the culinary team, ensuring premium standards. The venue overlooks scenic views, creating a premium atmosphere tailored for formal events, romantic dates, and corporate dinners. Premium pricing applies, and reservations must be completed well in advance.",
+        diet: "pescatarian",
+        budget: "high",
+        purpose: "celebration"
+    },
+    {
+        name: "Izakaya Shichi",
+        cuisine: "Japanese",
+        image: "Design/images/restaurant7.png",
+        dishes: [
+            { name: "Tonkotsu Ramen Bowl", price: 21 },
+            { name: "Salmon Sashimi Platter", price: 26 },
+            { name: "Chicken Yakitori Skewers", price: 13 },
+            { name: "Takoyaki Octopus Balls", price: 11 },
+            { name: "Agedashi Tofu", price: 9 },
+            { name: "Pork Gyoza Dumplings", price: 12 },
+            { name: "Edamame with Sea Salt", price: 7 },
+            { name: "Vegetable Tempura", price: 14 },
+            { name: "Tuna Tataki", price: 18 },
+            { name: "Karaage Chicken", price: 12 },
+            { name: "Matcha Mochi Ice Cream", price: 9 }
+        ],
+        deposit: 15,
+        priceRange: "$30 - $65",
+        description: "This dynamic establishment provides authentic Japanese pub food and freshly prepared sushi. The venue features traditional low seating and a vibrant open kitchen where chefs grill skewers over charcoal. Customers can enjoy an array of small plates, shared noodle bowls, and imported green teas. It is a highly popular destination for casual evening social gatherings.",
+        diet: "keto",
+        budget: "medium",
+        purpose: "night-out"
+    },
+    {
+        name: "Estiatorio Okto",
+        cuisine: "Greek",
+        image: "Design/images/restaurant8.png",
+        dishes: [
+            { name: "Traditional Moussaka", price: 25 },
+            { name: "Charcoal Grilled Octopus", price: 34 },
+            { name: "Greek Salad with Feta", price: 16 },
+            { name: "Spanakopita Pastry", price: 12 },
+            { name: "Tzatziki with Pita", price: 8 },
+            { name: "Galaktoboureko Dessert", price: 11 }
+        ],
+        deposit: 20,
+        priceRange: "$35 - $75",
+        description: "A bright and airy coastal destination highlighting traditional Greek Mediterranean recipes. The interior design utilizes classic white and blue tones to replicate an authentic island tavern vibe. The menu emphasizes fresh seafood, slow-roasted meats, and locally sourced olive oils. It serves as an excellent setting for romantic dinner dates and lively weekend celebrations.",
+        diet: "vegetarian",
+        budget: "high",
+        purpose: "brunch"
+    },
+    {
+        name: "Can Ting Jiu",
+        cuisine: "Chinese",
+        image: "Design/images/restaurant9.png",
+        dishes: [
+            { name: "Peking Duck Sharing Set", price: 58 },
+            { name: "Steamed Xiao Long Bao", price: 14 },
+            { name: "Spicy Mapo Tofu", price: 18 },
+            { name: "Kung Pao Chicken", price: 22 },
+            { name: "Beef Fried Noodles", price: 19 },
+            { name: "Har Gow Shrimp Dumplings", price: 13 },
+            { name: "Siu Mai Pork Dumplings", price: 12 },
+            { name: "Spring Rolls Veggie", price: 9 },
+            { name: "General Tso Chicken", price: 21 },
+            { name: "Sweet and Sour Pork", price: 20 },
+            { name: "Wonton Soup", price: 11 },
+            { name: "Mango Pomelo Sago", price: 10 }
+        ],
+        deposit: 0,
+        priceRange: "$20 - $55",
+        description: "This spacious venue offers a comprehensive selection of regional Chinese classic dishes and dim sum. Large round tables featuring lazy Susans make this space perfectly optimized for large family events. The culinary team focuses on robust aromatic spices, handmade noodles, and sweet glazed barbecue meats. Walk-ins are welcomed, though weekend dim sum hours get busy quickly.",
+        diet: "halal",
+        budget: "medium",
+        purpose: "family"
+    },
+    {
+        name: "Dhaba Das",
+        cuisine: "Indian",
+        image: "Design/images/restaurant10.png",
+        dishes: [
+            { name: "Aromatic Butter Chicken", price: 23 },
+            { name: "Paneer Tikka Masala", price: 21 },
+            { name: "Garlic Naan Basket", price: 7 },
+            { name: "Samosa Chaat", price: 11 },
+            { name: "Lamb Rogan Josh", price: 25 },
+            { name: "Dal Makhani", price: 18 },
+            { name: "Gulab Jamun Trio", price: 9 }
+        ],
+        deposit: 10,
+        priceRange: "$25 - $50",
+        description: "An aromatic dining experience featuring rich Northern and Southern Indian culinary staples. The colorful dining room boasts authentic cultural art and comfortable booth options for small groups. Guests can order from a diverse menu that accommodates spicy preferences, creamy curries, and tandoori items. It is highly regarded by working professionals looking for corporate lunch spots.",
+        diet: "vegan",
+        budget: "medium",
+        purpose: "business"
+    },
+    {
+        name: "Sikdang Sibil",
+        cuisine: "Korean BBQ",
+        image: "Design/images/restaurant11.png",
+        dishes: [
+            { name: "Wagyu Beef Bulgogi", price: 38 },
+            { name: "Pork Belly BBQ Combo", price: 34 },
+            { name: "Kimchi Fried Rice", price: 17 },
+            { name: "Japchae Glass Noodles", price: 19 },
+            { name: "Seafood Scallion Pancake", price: 21 },
+            { name: "Tteokbokki Spicy Cakes", price: 15 },
+            { name: "Silken Tofu Stew", price: 18 },
+            { name: "Sweet Hotteok Pancake", price: 11 }
+        ],
+        deposit: 25,
+        priceRange: "$40 - $85",
+        description: "An interactive culinary hub showcasing premium Korean barbecue choices built directly into table grills. The sleek, modern environment includes advanced exhaust systems to ensure a comfortable dining layout. Diners can select varied combos of high-grade meats, fermented side dishes, and spicy stews. This lively destination remains a prime choice for energetic corporate groups.",
+        diet: "keto",
+        budget: "high",
+        purpose: "celebration"
+    },
+    {
+        name: "Ran Ahan Sip-Song",
+        cuisine: "Thai",
+        image: "Design/images/restaurant12.png",
+        dishes: [
+            { name: "Classic Pad Thai Boran", price: 16 },
+            { name: "Spicy Tom Yum Goong", price: 22 },
+            { name: "Green Papaya Salad", price: 14 },
+            { name: "Massaman Beef Curry", price: 24 },
+            { name: "Chicken Satay Skewers", price: 12 },
+            { name: "Pineapple Fried Rice", price: 18 },
+            { name: "Vegetable Spring Rolls", price: 9 },
+            { name: "Garlic Pepper Prawns", price: 25 },
+            { name: "Red Curry with Duck", price: 23 },
+            { name: "Mango Sticky Rice", price: 10 }
+        ],
+        deposit: 0,
+        priceRange: "$15 - $40",
+        description: "A relaxed and affordable eatery serving up spicy, sweet, and sour traditional Thai street foods. The casual environment uses minimalist furniture to maximize open seating for fast customer turnover. The kitchen utilizes authentic imported herbs like lemongrass and galangal to deliver high-quality flavors. It stands as a perfect quick-stop budget restaurant for local university students.",
+        diet: "gluten-free",
+        budget: "low",
+        purpose: "solo"
+    }
+];
+
+// ================== Dynamic Select Data ==================
+// Pulls unique values directly from the mock database instead of hardcoding form options everywhere
+// Filters out "none" so it doesn't display as a dedicated option
+const uniqueDiets = [...new Set(restaurants.map(r => r.diet))].filter(d => d !== "none");
+const uniquePurposes = [...new Set(restaurants.map(r => r.purpose))].filter(p => p !== "none");
+
+// Capitalize the values to look nicer in the UI dropdowns
+
+// Capitalize the values to look nicer in the UI dropdowns
+const formatOptionLabel = (value) => { return value.charAt(0).toUpperCase() + value.slice(1); };
+
+//#endregion
+
+
+//#region ================== Global UI Elements ==================
+
+// ================== Navigation ==================
+// Handle mobile hamburger menu toggling
+const navToggleBtn = $("#navToggle");
+const mainNav = $("#mainNav");
+
+on(navToggleBtn, "click", () => mainNav.classList.toggle("open"));
+
+// ================== Global Select Buttons ==================
+// Uses event delegation on the document to catch clicks on any '.select-btn', 
+// ensuring dynamically injected buttons (like those on the recommendations page) still function properly
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
+        event.preventDefault();
+        redirectWithRestaurant(event.target.dataset.name);
+    }
+});
+
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("bill-btn")) {
+        event.preventDefault();
+        redirectToBill(event.target.dataset.name);
+    }
+});
+
+//#endregion
+
+
+//#region ================== Page: Restaurants ==================
+
 // ================== Dynamic Restaurant Page ==================
 const restaurantContainer = $("#restaurant-container");
 
@@ -185,18 +369,37 @@ if (restaurantContainer) {
         <article class="restaurant-card">
             <div class="restaurant-card-content">
                 <h2>${restaurant.name}</h2>
-                <img src="${restaurant.image}" alt="${restaurant.name} image">
-                <p><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
-                <p><strong>Signature Dishes:</strong></p>
-                <ul>
+                <img src="${restaurant.image}" alt="${restaurant.name} image" style="margin-bottom: 15px;">
+                
+                <div class="card-details-grid">
+                    <div class="detail-box">
+                        <span class="detail-label">Cuisine</span>
+                        <span class="detail-value">${restaurant.cuisine}</span>
+                    </div>
+                    <div class="detail-box">
+                        <span class="detail-label">Dietary</span>
+                        <span class="detail-value">${formatOptionLabel(restaurant.diet)}</span>
+                    </div>
+                    <div class="detail-box">
+                        <span class="detail-label">Price Range</span>
+                        <span class="detail-value">${restaurant.priceRange}</span>
+                    </div>
+                    <div class="detail-box">
+                        <span class="detail-label">Deposit</span>
+                        <span class="detail-value">$${restaurant.deposit}</span>
+                    </div>
+                </div>
+
+                <p style="margin-top: 5px;"><strong>Signature Dishes:</strong></p>
+                <ul style="margin-top: 5px;">
                     ${restaurant.dishes
                         .slice(0, 2)
                         .map(dish => `<li>${dish.name} - $${dish.price}</li>`)
                         .join("")}
                 </ul>
-                <p><strong>Deposit:</strong> $${restaurant.deposit}</p>
-                <p><strong>Price Range:</strong> ${restaurant.priceRange} per person</p>
+                
                 <p>${restaurant.description}</p>
+                
                 <div class="card-buttons">
                     <button type="button" class="bill-btn" data-name="${restaurant.name}">
                         Calculate Bill
@@ -210,44 +413,30 @@ if (restaurantContainer) {
     `).join("");
 }
 
+//#endregion
+
+
+//#region ================== Page: Recommendations ==================
+
 // ================== Dynamic Form Options ==================
 // Populate all select menus using the database
 const registerDietSelect = $(".register-form #diet");
 const recommendDietSelect = $(".recommendation-form #diet");
 const recommendPurposeSelect = $(".recommendation-form #purpose");
 
-// Register diets
-if (registerDietSelect) {
-    registerDietSelect.innerHTML = `<option value="">Select Option</option>`;
-
-    uniqueDiets.forEach(diet => {
-        registerDietSelect.appendChild(
-            new Option(formatOptionLabel(diet), diet)
-        );
+// Loop to generate options
+const populateDropdown = (selectElement, dataArray) => {
+    if (!selectElement) return;
+    // Sets a clear placeholder-style option acting as the "None" state
+    selectElement.innerHTML = `<option value="">Any / No Preference</option>`;
+    dataArray.forEach(item => {
+        selectElement.appendChild(new Option(formatOptionLabel(item), item));
     });
-}
+};
 
-// Recommendation diets
-if (recommendDietSelect) {
-    recommendDietSelect.innerHTML = `<option value="">Select Option</option>`;
-
-    uniqueDiets.forEach(diet => {
-        recommendDietSelect.appendChild(
-            new Option(formatOptionLabel(diet), diet)
-        );
-    });
-}
-
-// Recommendation purposes
-if (recommendPurposeSelect) {
-    recommendPurposeSelect.innerHTML = `<option value="">Select Option</option>`;
-
-    uniquePurposes.forEach(purpose => {
-        recommendPurposeSelect.appendChild(
-            new Option(formatOptionLabel(purpose), purpose)
-        );
-    });
-}
+populateDropdown(registerDietSelect, uniqueDiets);
+populateDropdown(recommendDietSelect, uniqueDiets);
+populateDropdown(recommendPurposeSelect, uniquePurposes);
 
 // ================== Dynamic Recommendation Page ==================
 const recommendationForm = $(".recommendation-form form");
@@ -266,10 +455,24 @@ if (recommendationForm && resultsContainer) {
 
                     <div class="recommendation-card-content">
                         <h3>${restaurant.name}</h3>
-                        <p><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
-                        <p><strong>Diet:</strong> ${formatOptionLabel(restaurant.diet)}</p>
-                        <p><strong>Purpose:</strong> ${formatOptionLabel(restaurant.purpose)}</p>
-                        <p><strong>Price Range:</strong> ${restaurant.priceRange}</p>
+                        <div class="card-details-grid">
+                            <div class="detail-box">
+                                <span class="detail-label">Cuisine</span>
+                                <span class="detail-value">${restaurant.cuisine}</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Dietary</span>
+                                <span class="detail-value">${formatOptionLabel(restaurant.diet)}</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Purpose</span>
+                                <span class="detail-value">${formatOptionLabel(restaurant.purpose)}</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Price Range</span>
+                                <span class="detail-value">${restaurant.priceRange}</span>
+                            </div>
+                        </div>
                         ${
                             showReasons && restaurant.matches
                             ? `<p><strong>Matched:</strong> ${restaurant.matches.join(", ")}</p>`
@@ -297,14 +500,12 @@ if (recommendationForm && resultsContainer) {
     };
 
     // Copy the data so original isn't affected
-    // Then provide 3 random picks for suggestions
+    // Then provide 3 random picks for suggestions right when the page loads
     const randomRestaurants = [...restaurants]
         .sort(() => 0.5 - Math.random())
         .slice(0, 3);
         
-    renderRecommendations(randomRestaurants,
-        `<div class="results-heading"><h3>Today's Random Picks:</h3></div>`
-    );
+    renderRecommendations(randomRestaurants, `<div class="results-heading"><h3>Today's Random Picks:</h3></div>`);
 
     on(recommendationForm, "submit", (event) => {
         event.preventDefault();
@@ -320,7 +521,7 @@ if (recommendationForm && resultsContainer) {
 
         // Require all selected fields to match for a perfect recommendation
         const exactMatches = restaurants.filter(r => {
-            // Extract the numbers from the "$20 - $45" string using regex
+            // Extract the numbers from the "$20 - $45" string using regex to actually compare them properly
             const prices = r.priceRange.match(/\d+/g);
             const rMin = parseInt(prices[0], 10);
             const rMax = parseInt(prices[1], 10);
@@ -385,6 +586,7 @@ if (recommendationForm && resultsContainer) {
         }
     });
 
+    // Local event delegation just for the results container
     on(resultsContainer, "click", (event) => {
         if (event.target.classList.contains("select-btn")) {
             event.preventDefault();
@@ -397,22 +599,10 @@ if (recommendationForm && resultsContainer) {
     });
 }
 
-// ================== Global Select Buttons ==================
-// Uses event delegation on the document to catch clicks on any '.select-btn', 
-// ensuring dynamically injected buttons still function properly
-document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
-        event.preventDefault();
-        redirectWithRestaurant(event.target.dataset.name);
-    }
-});
+//#endregion
 
-document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("bill-btn")) {
-        event.preventDefault();
-        redirectToBill(event.target.dataset.name);
-    }
-});
+
+//#region ================== Page: User Forms (Register & Reservation) ==================
 
 // ================== Reservation Form ==================
 const reservationForm = $(".reservation-form form");
@@ -426,6 +616,7 @@ if (reservationForm) {
     const restaurantField = $("#restaurant");
     const depositField = $("#deposit");
 
+    // Hide payment fields on initial load until a method is selected
     voucherSection.style.display = "none";
     cardSection.style.display = "none";
 
@@ -492,6 +683,7 @@ if (reservationForm) {
         const card = $("#card").value;
         const today = new Date().toISOString().split("T")[0];
 
+        // Run all the validations and check if user screwed up somewhere
         if (fullname === "") errors.push("Full name is required.");
         if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
         if (!reservationPhonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits.");
@@ -539,6 +731,11 @@ if (registerForm) {
     });
 }
 
+//#endregion
+
+
+//#region ================== Page: Bill Calculator ==================
+
 // ================== Bill Calculator ==================
 const restaurantSelect = $("#calc-restaurant");
 const totalInput = $("#calc-total");
@@ -551,6 +748,7 @@ if (restaurantSelect && totalInput && dishList) {
 
     const updateTotal = () => {
         let total = 0;
+        // Loop through all inputs and sum up (quantity * price)
         $$(".dish-quantity").forEach(input => {
             const quantity = Number(input.value) || 0;
             const price = Number(input.dataset.price);
@@ -572,6 +770,7 @@ if (restaurantSelect && totalInput && dishList) {
         reserveBtn.style.display = "block";
         reserveBtn.dataset.name = selectedRestaurant.name;
 
+        // Render the dishes out so the user can punch in numbers
         dishList.innerHTML = selectedRestaurant.dishes.map(dish => `
             <div class="dish-card">
                 <img src="${selectedRestaurant.image}" alt="${dish.name}">
@@ -598,6 +797,7 @@ if (restaurantSelect && totalInput && dishList) {
         updateTotal();
     });
 
+    // Check if we arrived here by clicking a 'Calculate Bill' button elsewhere
     const billParams = new URLSearchParams(window.location.search);
     const selectedRestaurant =
         billParams.get("restaurant") ||
@@ -605,14 +805,13 @@ if (restaurantSelect && totalInput && dishList) {
 
     if (selectedRestaurant) {
         restaurantSelect.value = selectedRestaurant;
-
-        restaurantSelect.dispatchEvent(
-            new Event("change")
-        );
+        // Manually trigger the change event to populate the dishes
+        restaurantSelect.dispatchEvent(new Event("change"));
     }
 
     on(reserveBtn, "click", () => { redirectWithRestaurant(reserveBtn.dataset.name); });
 
+    // Handle the cool +/- buttons for dish quantities
     on(dishList, "click", (event) => {
         const input = event.target.parentElement?.querySelector(".dish-quantity");
         if (!input) return;
@@ -624,16 +823,19 @@ if (restaurantSelect && totalInput && dishList) {
         }
 
         if (event.target.classList.contains("minus-btn")) {
-            value = Math.max(0, value - 1);
+            value = Math.max(0, value - 1); // Prevent negative food!
         }
 
         input.value = value;
         updateTotal();
     });
 
+    // Just in case they type the number in manually instead of using buttons
     on(dishList, "input", (event) => {
         if (event.target.classList.contains("dish-quantity")) {
             updateTotal();
         }
     });
 }
+
+//#endregion
