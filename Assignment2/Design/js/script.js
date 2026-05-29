@@ -19,6 +19,12 @@ const on = (element, event, handler) => {
     if (element) element.addEventListener(event, handler);
 };
 
+// Strips out all whitespaces from names to match the local image files folder names dynamically
+const getCleanImageName = (name) => name.replace(/\s+/g, "");
+
+// Attempts loading as .jpg first, if failed then fallback and load as .jpeg using inline HTML onerror listener
+const imageFallbackAttributes = `onerror="this.onerror=null; if(this.src.includes('.jpg')) this.src=this.src.replace('.jpg', '.jpeg');"`;
+
 // ================== Redirect Helpers ==================
 // Uses localStorage to temporarily hold the user's choice across page loads, 
 // allowing the reservation form to auto-select the chosen restaurant.
@@ -369,7 +375,7 @@ if (restaurantContainer) {
         <article class="restaurant-card">
             <div class="restaurant-card-content">
                 <h2>${restaurant.name}</h2>
-                <img src="${restaurant.image}" alt="${restaurant.name} image" style="margin-bottom: 15px;">
+                <img src="Design/images/${getCleanImageName(restaurant.name)}.jpg" ${imageFallbackAttributes} alt="${restaurant.name} image" style="margin-bottom: 15px;">
                 
                 <div class="card-details-grid">
                     <div class="detail-box">
@@ -451,7 +457,7 @@ if (recommendationForm && resultsContainer) {
 
             html += restaurantList.map(restaurant => `
                 <article class="recommendation-card">
-                    <img src="${restaurant.image}" alt="${restaurant.name} image">
+                    <img src="Design/images/${getCleanImageName(restaurant.name)}.jpg" ${imageFallbackAttributes} alt="${restaurant.name} image">
 
                     <div class="recommendation-card-content">
                         <h3>${restaurant.name}</h3>
@@ -773,7 +779,7 @@ if (restaurantSelect && totalInput && dishList) {
         // Render the dishes out so the user can punch in numbers
         dishList.innerHTML = selectedRestaurant.dishes.map(dish => `
             <div class="dish-card">
-                <img src="${selectedRestaurant.image}" alt="${dish.name}">
+                <img src="Design/images/${getCleanImageName(dish.name)}.jpg" ${imageFallbackAttributes} alt="${dish.name}">
                 <div class="dish-card-content">
                     <div class="dish-header">
                         <h3>${dish.name}</h3>
