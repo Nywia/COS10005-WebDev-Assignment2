@@ -432,7 +432,7 @@ legend {
     gap: 12px;
 }
 
-#date, #time, #min-budget, #max-budget {
+#date, #time, #min-budget, #max-budget, #voucher, #card {
     margin-top: 8px;
     width: 100%;
 }

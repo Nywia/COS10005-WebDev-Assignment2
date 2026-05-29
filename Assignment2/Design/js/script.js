@@ -8,6 +8,7 @@ const registerPhonePattern = /^[0-9]{8,15}$/;
 const reservationPhonePattern = /^[0-9]{10,}$/;
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{10,}$/;
 const cardPattern = /^([0-9]{15}|[0-9]{16})$/; // Amex 15 and Visa 16 handled together
+const voucherPattern = /^[0-9]{12}$/;
 
 // ================== Helpers ==================
 // So I don't need to keep typing the same things over and over again.
@@ -797,9 +798,6 @@ if (reservationForm) {
             const isVoucher = event.target.value === "voucher";
             toggleDisplay(voucherSection, isVoucher);
             toggleDisplay(cardSection, !isVoucher);
-
-            $("#voucher").required = isVoucher;
-            $("#card").required = !isVoucher;
         });
     });
 
@@ -824,6 +822,7 @@ if (reservationForm) {
         const people = $("#people").value;
         const payment = $('input[name="payment"]:checked');
         const card = $("#card").value;
+        const voucher = $("#voucher").value;
         const today = new Date().toISOString().split("T")[0];
 
         // Run all the validations and check if user screwed up somewhere
@@ -831,16 +830,19 @@ if (reservationForm) {
         if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
         if (!reservationPhonePattern.test(phone)) errors.push("Phone number must contain at least 10 digits.");
         if (!restaurant) errors.push("Please select a restaurant.");
+
         if (!date) errors.push("Please select a reservation date.");
         else if (date < today) errors.push("Reservation date cannot be in the past.");
+
         if (!time) errors.push("Please select a reservation time.");
         if (Number(people) <= 0) errors.push("Number of people must be greater than 0.");
 
-        if (!payment) {
+        if (!payment)
             errors.push("Please select a deposit payment method.");
-        } else if (payment.value === "online" && !cardPattern.test(card)) {
+        else if (payment.value === "voucher" && !voucherPattern.test(voucher))
+            errors.push("Voucher code must contain exactly 12 digits.");
+        else if (payment.value === "online" && !cardPattern.test(card))
             errors.push("Invalid credit card format. Please enter 15 or 16 digits.");
-        }
 
         displayErrors(errors, event, reservationForm);
     });

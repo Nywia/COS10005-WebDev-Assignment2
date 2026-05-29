@@ -50,13 +50,13 @@
             <form method="POST" action="https://mercury.swin.edu.au/it000000/cos10005/regtest.php">
 
                 <label for="fname">Full Name</label>
-                <input type="text" id="fname" name="fname" required>
+                <input type="text" id="fname" name="fname">
 
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email">
 
                 <label for="phone">Phone</label>
-                <input type="tel" id="phone" name="phone" required>
+                <input type="tel" id="phone" name="phone">
 
                 <label for="restaurant">Restaurant Selection</label>
                 <select id="restaurant" name="restaurant"></select>
@@ -65,18 +65,18 @@
 
                     <div class="datetime-field">
                         <label for="date">Reservation Date</label>
-                        <input type="date" id="date" name="date" required>
+                        <input type="date" id="date" name="date">
                     </div>
 
                     <div class="datetime-field">
                         <label for="time">Reservation Time</label>
-                        <input type="time" id="time" name="time" required>
+                        <input type="time" id="time" name="time">
                     </div>
 
                 </div>
 
                 <label for="people">Number of People</label>
-                <input type="number" id="people" name="people" min="1" value="1" required>
+                <input type="number" id="people" name="people" min="1" value="1">
 
                 <label for="requests">Special Requests</label>
                 <textarea id="requests" name="requests" rows="4" cols="30"></textarea>
@@ -88,12 +88,12 @@
                     <legend>Deposit Method</legend>
 
                     <label>
-                        <input type="radio" name="payment" value="voucher" required>
+                        <input type="radio" name="payment" value="voucher">
                         Voucher
                     </label>
 
                     <label>
-                        <input type="radio" name="payment" value="online" required>
+                        <input type="radio" name="payment" value="online">
                         Online Payment
                     </label>
                 </fieldset>
@@ -101,21 +101,20 @@
                 <!-- Voucher Section -->
                 <div id="voucher-section">
                     <label for="voucher">Voucher Code</label>
-                    <input type="text" id="voucher" name="voucher"
-                        maxlength="12" pattern="[0-9]{12}">
+                    <input type="text" id="voucher" name="voucher" maxlength="12" placeholder="Enter 12 digit voucher code">
                 </div>
 
                 <!-- Card Section -->
                 <div id="card-section">
                     <label for="card">Credit Card Details</label>
-                    <input type="text" id="card" name="card" pattern="[0-9]{15,16}">
+                    <input type="text" id="card" name="card" placeholder="Enter 15-16 digit card code">
                 </div>
 
                 <label for="billing-email">Billing Email Address</label>
                 <input type="email" id="billing-email" name="billing-email">
 
                 <label>
-                    <input type="checkbox" id="same-email">
+                    <input type="checkbox" id="same-email" checked>
                     Same as email address
                 </label>
 
