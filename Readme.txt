@@ -4,7 +4,7 @@ Assignment: Web Development Assignment 2
 ----------------------------------------
 GITHUB REPOSITORY
 ----------------------------------------
-Link: 
+Link: https://github.com/Nywia/COS10005-WebDev-Assignment2
 
 ----------------------------------------
 WEBSITE STRUCTURE
