@@ -12,13 +12,14 @@
 
     <link rel="stylesheet" href="Design/css/style.css" type="text/css">
     <script src="Design/js/script.js" defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- Header -->
-    <header>
-        <h1>Home Page</h1>
-    </header>
 
     <!-- Navigation -->
     <button id="navToggle">☰</button>
@@ -35,74 +36,86 @@
     </nav>
 
     <!-- Main Content -->
-    <main>
+    <main class="homepage-main">
 
-        <!-- Introduction Section -->
-        <section id="intro">
-            <h2>Dining Experience</h2>
-
-            <p>
-                Welcome to the website. This platform is designed to assist users with finding places to eat and making table bookings without much effort. Finding a good restaurant can take a long time, so this website helps speed up the process.
-            </p>
-
-            <!-- Placeholder Image -->
-            <img src="Design/images/restaurant.png" alt="Restaurant image">
-            <p class="reference"> Image source: Lorem Ipsum </p>
-        </section>
-
-        <!-- About Section -->
-        <section id="about">
-            <h2>About</h2>
-
-            <p>
-                The core values of this platform focus on convenience, variety, accessibility, and improving the overall dining experience. Convenience means booking from anywhere. Variety ensures there are many different types of food options available. Accessibility makes the system easy for everyone to use, leading to a better dining experience overall.
-            </p>
-        </section>
-
-        <section id="quick-book">
-            <h2>Quick Booking</h2>
-            <p>Ready to eat? Select a restaurant below to instantly reserve your table.</p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="select-btn" data-name="Ristorante Uno">Book Ristorante Uno</button>
-                <button class="select-btn" data-name="Restaurant Deux">Book Restaurant Deux</button>
-                <button class="select-btn" data-name="Restaurante Cinco">Book Restaurante Cinco</button>
-            </div>
-        </section>
-
-        <!-- Users Section -->
-        <section id="users">
-            <h2>Target users</h2>
-
-            <p>
-                This platform caters to a wide range of target users. Families can find spacious dining spots, while couples can look for quieter locations. Busy professionals can quickly secure lunch tables, and tourists can discover popular local food spots in unfamiliar areas.
-            </p>
-        </section>
-
-        <!-- Services -->
-        <section id="services">
-            <h2>Services</h2>
-
-            <div class="service-card">
-                <h3>Restaurant Discovery</h3>
-                <p>
-                    Users can browse through a comprehensive list of local dining establishments, view details, and check menus to discover new options.
+        <section id="hero">
+            <div class="hero-slideshow"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <p class="hero-tag">Premium Dining Experience</p>
+                <h1>
+                    Discover Restaurants.<br>
+                    Reserve Instantly.
+                </h1>
+                <p class="hero-description">
+                    Explore curated dining experiences, discover new cuisines,
+                    and reserve your table in seconds.
                 </p>
+                <div class="hero-buttons">
+                    <a href="restaurants.html">
+                        <button type="button">Browse Restaurants</button>
+                    </a>
+                    <a href="reservation.html">
+                        <button type="button" class="secondary-btn">Book Now</button>
+                    </a>
+                </div>
             </div>
-
-            <div class="service-card">
-                <h3>Recommendations</h3>
-                <p>
-                    The platform provides tailored suggestions based on specific user preferences, making it easier to decide where to eat.
-                </p>
-            </div>
-
-            <div class="service-card">
-                <h3>Reservations</h3>
-                <p>
-                    Tables can be booked directly through the platform, complete with an optional deposit feature to secure the time slot.
-                </p>
-            </div>
+            <div class="scroll-indicator">↓ Scroll</div>
         </section>
+
+        <div class="homepage-content">
+
+            <section id="quick-book">
+                <h2>Quick Booking</h2>
+                <p>Ready to eat? Reserve instantly from our featured restaurants.</p>
+                <div class="quick-book-grid"></div>
+            </section>
+            
+            <!-- About Section -->
+            <section id="about">
+                <h2>About</h2>
+
+                <p>
+                    The core values of this platform focus on convenience, variety, accessibility, and improving the overall dining experience. Convenience means booking from anywhere. Variety ensures there are many different types of food options available. Accessibility makes the system easy for everyone to use, leading to a better dining experience overall.
+                </p>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users">
+                <h2>Target users</h2>
+
+                <p>
+                    This platform caters to a wide range of target users. Families can find spacious dining spots, while couples can look for quieter locations. Busy professionals can quickly secure lunch tables, and tourists can discover popular local food spots in unfamiliar areas.
+                </p>
+            </section>
+
+            <!-- Services -->
+            <section id="services">
+                <h2>Services</h2>
+
+                <div class="service-card">
+                    <h3>Restaurant Discovery</h3>
+                    <p>
+                        Users can browse through a comprehensive list of local dining establishments, view details, and check menus to discover new options.
+                    </p>
+                </div>
+
+                <div class="service-card">
+                    <h3>Recommendations</h3>
+                    <p>
+                        The platform provides tailored suggestions based on specific user preferences, making it easier to decide where to eat.
+                    </p>
+                </div>
+
+                <div class="service-card">
+                    <h3>Reservations</h3>
+                    <p>
+                        Tables can be booked directly through the platform, complete with an optional deposit feature to secure the time slot.
+                    </p>
+                </div>
+            </section>
+
+        </div>
     </main>
 
     <footer>&copy; 2026 Ruiyi Guo</footer>

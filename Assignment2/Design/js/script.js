@@ -328,9 +328,66 @@ const uniqueDiets = [...new Set(restaurants.map(r => r.diet))].filter(d => d !==
 const uniquePurposes = [...new Set(restaurants.map(r => r.purpose))].filter(p => p !== "none");
 
 // Capitalize the values to look nicer in the UI dropdowns
-
-// Capitalize the values to look nicer in the UI dropdowns
 const formatOptionLabel = (value) => { return value.charAt(0).toUpperCase() + value.slice(1); };
+
+//#endregion
+
+
+//#region ================== Page: Index ==================
+
+const heroSlideshow = $(".hero-slideshow");
+
+if (heroSlideshow) {
+
+    // Shuffle restaurants for variety each refresh
+    const shuffledRestaurants = [...restaurants].sort(() => 0.5 - Math.random()).slice(0, 5);
+
+    heroSlideshow.innerHTML = shuffledRestaurants.map((restaurant, index) => `
+        <div class="hero-slide ${index === 0 ? "active" : ""}">
+            <img 
+                src="Design/images/${getCleanImageName(restaurant.name)}.jpg"
+                ${imageFallbackAttributes}
+                alt="${restaurant.name}"
+            >
+        </div>
+    `).join("");
+
+    const slides = $$(".hero-slide");
+    let currentSlide = 0;
+
+    setInterval(() => {
+        slides[currentSlide].classList.remove("active");
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add("active");
+    }, 4000);
+}
+
+const quickBookGrid = $(".quick-book-grid");
+
+if (quickBookGrid) {
+
+    const featuredRestaurants = [...restaurants].sort(() => 0.5 - Math.random()).slice(0, 3);
+
+    quickBookGrid.innerHTML = featuredRestaurants.map(restaurant => `
+        <article class="quick-book-card">
+            <img 
+                src="Design/images/${getCleanImageName(restaurant.name)}.jpg"
+                ${imageFallbackAttributes}
+                alt="${restaurant.name}"
+            >
+            <div class="quick-book-content">
+                <h3>${restaurant.name}</h3>
+                <p>${restaurant.description.slice(0, 110)}...</p>
+                <button 
+                    class="select-btn"
+                    data-name="${restaurant.name}"
+                >
+                    Reserve Table
+                </button>
+            </div>
+        </article>
+    `).join("");
+}
 
 //#endregion
 
@@ -637,23 +694,25 @@ if (reservationForm) {
     };
     on(restaurantField, "change", updateDepositValue);
 
-    // Check localStorage to pre-fill the restaurant if the user navigated here from a recommendation
+    // Check localStorage or URL parameters to pre-fill the restaurant if navigating from another page
     const params = new URLSearchParams(window.location.search);
     const selectedRestaurant = params.get("restaurant") || localStorage.getItem("selectedRestaurant");
     if (selectedRestaurant) {
         restaurantField.value = selectedRestaurant;
         updateDepositValue();
+        // Clear it immediately after reading so it won't persist on a fresh reload/re-visit!
+        localStorage.removeItem("selectedRestaurant");
     }
 
-    // Enforce a minimum booking window (2 hours from now) to prevent past bookings
+    // Enforce a minimum booking window (2 hours from now) to prevent immediate or past bookings
     const now = new Date();
     now.setHours(now.getHours() + 2);
     const adjustedDate = now.toISOString().split("T")[0];
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
 
-    $("#date").min = now;
     $("#date").value = adjustedDate;
+    $("#date").min = adjustedDate;
     $("#time").value = `${hours}:${minutes}`;
 
     // Dynamically toggle required fields based on payment method 
@@ -805,14 +864,15 @@ if (restaurantSelect && totalInput && dishList) {
 
     // Check if we arrived here by clicking a 'Calculate Bill' button elsewhere
     const billParams = new URLSearchParams(window.location.search);
-    const selectedRestaurant =
-        billParams.get("restaurant") ||
-        localStorage.getItem("selectedRestaurant");
+    const selectedRestaurant = billParams.get("restaurant") || localStorage.getItem("selectedRestaurant");
 
     if (selectedRestaurant) {
         restaurantSelect.value = selectedRestaurant;
         // Manually trigger the change event to populate the dishes
         restaurantSelect.dispatchEvent(new Event("change"));
+        
+        // Clear it immediately after reading so it won't persist on a fresh reload/re-visit!
+        localStorage.removeItem("selectedRestaurant");
     }
 
     on(reserveBtn, "click", () => { redirectWithRestaurant(reserveBtn.dataset.name); });
