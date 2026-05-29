@@ -7,19 +7,123 @@ const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{10,
 const cardPattern = /^([0-9]{15}|[0-9]{16})$/; // Amex 15 and Visa 16 handled together
 
 // ================== Helpers ==================
+// So I don't need to keep typing the same things over and over again.
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
+
 const on = (element, event, handler) => {
     if (element) element.addEventListener(event, handler);
 };
 
-// Dynamic Error Display (Replacing alert)
+// ================== Shared Restaurant Data ==================
+// Basically a mock database to keep content consistent across all pages without needing to make changes for every page every time something needs to be changed 
+const restaurants = [
+    {
+        name: "Ristorante Uno",
+        cuisine: "Italian",
+        image: "Design/images/restaurant1.png",
+        dishes: [
+            { name: "Margherita Pizza", price: 18 },
+            { name: "Spaghetti Carbonara", price: 22 }
+        ],
+        deposit: 10,
+        priceRange: "$20 - $45",
+        description: "This establishment offers traditional Italian meals prepared with fresh ingredients. The venue features a classic dining setup suitable for family gatherings and casual dinners. Customers can select from a range of pasta dishes, wood-fired pizzas, and classic desserts. Standard seating is available daily, and booking in advance is highly recommended for weekend evenings.",
+        diet: "none",
+        budget: "medium",
+        purpose: "family"
+    },
+
+    {
+        name: "Restaurant Deux",
+        cuisine: "French",
+        image: "Design/images/restaurant2.png",
+        dishes: [
+            { name: "Steak Frites", price: 35 },
+            { name: "Crème Brûlée", price: 12 }
+        ],
+        deposit: 25,
+        priceRange: "$40 - $90",
+        description: "A fine dining option focusing on traditional French culinary techniques. The menu includes classic options like steak, seafood, and rich desserts. The environment is formal and well-suited for special occasions, couples, and professional business dinners. High-quality ingredients are utilized across all dishes, and an extensive beverage list is provided for guests.",
+        diet: "none",
+        budget: "high",
+        purpose: "date"
+    },
+
+    {
+        name: "Restaurante Tres",
+        cuisine: "Spanish",
+        image: "Design/images/restaurant3.png",
+        dishes: [
+            { name: "Seafood Paella", price: 28 },
+            { name: "Garlic Prawns Tapas", price: 14 }
+        ],
+        deposit: 15,
+        priceRange: "$25 - $60",
+        description: "This venue serves a variety of traditional Spanish tapas and sharing platters. It provides a lively atmosphere that accommodates both small and large dining groups easily. The menu highlights regional seafood variations, rice dishes, and traditional finger foods. It represents an excellent option for sharing meals among friends, family members, or traveling tourists.",
+        diet: "none",
+        budget: "medium",
+        purpose: "family"
+    },
+
+    {
+        name: "Restaurant Vier",
+        cuisine: "German",
+        image: "Design/images/restaurant1.png",
+        dishes: [
+            { name: "Chicken Schnitzel", price: 24 },
+            { name: "Apple Strudel", price: 10 }
+        ],
+        deposit: 10,
+        priceRange: "$20 - $50",
+        description: "A casual dining spot offering hearty German meals and classic comfort food options. The interior uses simple wood styling to replicate a traditional European tavern layout. Portions are large and designed to satisfy general dining requirements. Families and tourist groups frequently visit this location due to the relaxed environment and straightforward menu options.",
+        diet: "vegan",
+        budget: "medium",
+        purpose: "family"
+    },
+
+    {
+        name: "Restaurante Cinco",
+        cuisine: "Mexican",
+        image: "Design/images/restaurant5.png",
+        dishes: [
+            { name: "Beef Tacos Trio", price: 16 },
+            { name: "Chicken Enchiladas", price: 19 }
+        ],
+        deposit: 0,
+        priceRange: "$15 - $35",
+        description: "This establishment offers fast, vibrant Mexican street food options. No upfront deposit is required to secure a table, making it a highly accessible choice for casual dining. The menu consists of customizable tacos, burritos, and shared appetizers. The bright decor makes it appealing to younger crowds, students, and professionals seeking quick lunch options.",
+        diet: "halal",
+        budget: "low",
+        purpose: "business"
+    },
+
+    {
+        name: "Ristorante Sei",
+        cuisine: "Italian Seafood",
+        image: "Design/images/restaurant6.png",
+        dishes: [
+            { name: "Lobster Ravioli", price: 32 },
+            { name: "Grilled Seafood Platter", price: 45 }
+        ],
+        deposit: 30,
+        priceRange: "$50 - $110",
+        description: "A premium dining establishment focusing heavily on upscale Italian seafood recipes. Fresh catches are prepared daily by the culinary team, ensuring premium standards. The venue overlooks scenic views, creating a premium atmosphere tailored for formal events, romantic dates, and corporate dinners. Premium pricing applies, and reservations must be completed well in advance.",
+        diet: "none",
+        budget: "high",
+        purpose: "business"
+    }
+];
+
+// ================== Dynamic Error Display ==================
+// Injects a visually cooler error box than the ugly alert notification  
+// and scrolling it into view so the user immediately notices
 const displayErrors = (errors, event, formElement) => {
-    let errorContainer = formElement.querySelector('.error-box');
-    
+    let errorContainer = formElement.querySelector(".error-box");
+
     if (!errorContainer) {
-        errorContainer = document.createElement('div');
-        errorContainer.className = 'error-box';
+        errorContainer = document.createElement("div");
+        errorContainer.className = "error-box";
         formElement.prepend(errorContainer);
     }
 
@@ -27,48 +131,139 @@ const displayErrors = (errors, event, formElement) => {
         errorContainer.style.display = "none";
     } else {
         event.preventDefault();
-        errorContainer.innerHTML = '<strong>Please fix the following errors:</strong><ul>' + 
-            errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
+        errorContainer.innerHTML = `<strong>Please fix the following errors:</strong><ul>${errors.map(error => `<li>${error}</li>`).join("")}</ul>`;
         errorContainer.style.display = "block";
-        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        errorContainer.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 };
 
-const redirectWithRestaurant = (restaurantName) => {
-    localStorage.setItem("selectedRestaurant", restaurantName);
-    window.location.href = `reservation.html?restaurant=${encodeURIComponent(restaurantName)}`;
-};
-
 // ================== Navigation ==================
+// Handle mobile hamburger menu toggling
 const navToggleBtn = $("#navToggle");
 const mainNav = $("#mainNav");
 
 on(navToggleBtn, "click", () => mainNav.classList.toggle("open"));
 
-// ================== Register Form ==================
-const registerForm = $(".register-form form");
+// ================== Redirect Helper ==================
+// Uses localStorage to temporarily hold the user's choice across page loads, 
+// allowing the reservation form to auto-select the chosen restaurant
+// also encodes the data into the url because localStorage doesn't work properly
+// when testing locally using file:// 
+const redirectWithRestaurant = (restaurantName) => {
+    localStorage.setItem("selectedRestaurant", restaurantName);
+    window.location.href = `reservation.html?restaurant=${encodeURIComponent(restaurantName)}`;
+};
 
-on(registerForm, "submit", (event) => {
-    const errors = [];
-    const username = $("#username").value;
-    const email = $("#email").value;
-    const phone = $("#phone").value;
-    const password = $("#password").value;
-    const confirmPassword = $("#confirm-password").value;
-    const gender = $('input[name="gender"]:checked');
-    const diet = $("#diet").value;
-    const country = $("#country").value;
+// ================== Dynamic Restaurant Page ==================
+const restaurantContainer = $("#restaurant-container");
 
-    if (!usernamePattern.test(username)) errors.push("Username must be at least 5 characters (letters, numbers, underscores).");
-    if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
-    if (!registerPhonePattern.test(phone)) errors.push("Phone number must contain 8 to 15 digits."); // Updated error text
-    if (!passwordPattern.test(password)) errors.push("Password must be 10+ characters with upper, lower, number, and special character.");
-    if (password !== confirmPassword) errors.push("Passwords do not match.");
-    if (!gender) errors.push("Please select a gender.");
-    if (!diet) errors.push("Please select your dietary preferences.");
-    if (!country) errors.push("Please select a country/region.");
+if (restaurantContainer) {
+    // Injects standard HTML structures based on our cool mock database to prevent hardcoding errors
+    restaurantContainer.innerHTML = restaurants.map(restaurant => `
+        <article class="restaurant-card">
+            <h2>${restaurant.name}</h2>
+            <img src="${restaurant.image}" alt="${restaurant.name} image">
+            <p><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
+            <p><strong>Signature Dishes:</strong></p>
+            <ul>
+                ${restaurant.dishes.map(dish => `<li>${dish.name} - $${dish.price}</li>`).join("")}
+            </ul>
+            <p><strong>Deposit:</strong> $${restaurant.deposit}</p>
+            <p><strong>Price Range:</strong> ${restaurant.priceRange} per person</p>
+            <p>${restaurant.description}</p>
+            <button type="button" class="select-btn" data-name="${restaurant.name}">Book this</button>
+        </article>
+    `).join("");
+}
 
-    displayErrors(errors, event, registerForm);
+// ================== Recommendation Page ==================
+const recommendationForm = $(".recommendation-form form");
+const resultsContainer = $("#results");
+
+if (recommendationForm && resultsContainer) {
+    
+    // Ensure UI consistency whether showing random picks or search results
+    const renderRecommendations = (restaurantList, headingHtml = "") => {
+        if (restaurantList.length > 0) {
+            let html = headingHtml;
+            html += restaurantList.map(restaurant => `
+                <div class="recommendation-card">
+                    <h3>${restaurant.name}</h3>
+                    <p>${restaurant.cuisine}</p>
+                    <p>Price Range: ${restaurant.priceRange}</p>
+                    <button type="button" class="select-btn" data-name="${restaurant.name}">Select</button>
+                </div>
+            `).join("");
+            resultsContainer.innerHTML = html;
+        } else {
+            resultsContainer.innerHTML = `
+                <div class="recommendation-card">
+                    <h3>No Match Found</h3>
+                    <p>Try broadening your search criteria.</p>
+                </div>`;
+        }
+    };
+
+    // Copy the data so original isn't affected
+    // Then provide 3 random picks for suggestions
+    const randomRestaurants = [...restaurants]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3);
+        
+    renderRecommendations(randomRestaurants, `<h3>Today's Random Picks:</h3>`);
+
+    on(recommendationForm, "submit", (event) => {
+        event.preventDefault();
+
+        const diet = $("#diet").value;
+        const budget = $("#budget").value;
+        const purpose = $("#purpose").value;
+
+        // Require all selected fields to match for a perfect recommendation
+        const exactMatches = restaurants.filter(r => 
+            (!diet || r.diet === diet) && 
+            (!budget || r.budget === budget) && 
+            (!purpose || r.purpose === purpose)
+        );
+        
+        let finalResults = exactMatches;
+        let heading = `<h3>Your Matches:</h3>`;
+
+        // Fallback scoring system: if no exact match exists, rank options by how many criteria they meet, basically a fuzzy search
+        // This ensures the user always gets a helpful suggestion rather than a dead end
+        if (exactMatches.length === 0) {
+            finalResults = restaurants.map(restaurant => {
+                let score = 0;
+                if (diet && restaurant.diet === diet) score++;
+                if (budget && restaurant.budget === budget) score++;
+                if (purpose && restaurant.purpose === purpose) score++;
+                return { ...restaurant, score };
+            })
+            .filter(r => r.score > 0)
+            .sort((a, b) => b.score - a.score);
+
+            heading = `<h3>No exact matches, but here are some suggestions:</h3>`;
+        }
+
+        renderRecommendations(finalResults, heading);
+    });
+
+    on(resultsContainer, "click", (event) => {
+        if (event.target.classList.contains("select-btn")) {
+            event.preventDefault();
+            redirectWithRestaurant(event.target.dataset.name);
+        }
+    });
+}
+
+// ================== Global Select Buttons ==================
+// Uses event delegation on the document to catch clicks on any '.select-btn', 
+// ensuring dynamically injected buttons still function properly
+document.addEventListener("click", (event) => {
+    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
+        event.preventDefault();
+        redirectWithRestaurant(event.target.dataset.name);
+    }
 });
 
 // ================== Reservation Form ==================
@@ -86,61 +281,54 @@ if (reservationForm) {
     voucherSection.style.display = "none";
     cardSection.style.display = "none";
 
-    const depositRules = {
-        "Ristorante Uno": "$10.00",
-        "Restaurant Deux": "$25.00",
-        "Restaurante Tres": "$15.00",
-        "Restaurant Vier": "$10.00",
-        "Restaurante Cinco": "$0.00",
-        "Ristorante Sei": "$30.00"
-    };
+    // Populate options based on database, preventing (my) hardcoded errors
+    restaurantField.innerHTML = `<option value="">Select Restaurant</option>`;
+    restaurants.forEach(r => restaurantField.appendChild(new Option(r.name, r.name)));
 
+    // Automatically update the readonly deposit field when a restaurant is chosen
     const updateDepositValue = () => {
-        const selected = restaurantField.value;
-        depositField.value = depositRules[selected] || "$0.00";
+        const selectedRestaurant = restaurants.find(r => r.name === restaurantField.value);
+        depositField.value = selectedRestaurant ? `$${selectedRestaurant.deposit.toFixed(2)}` : "$0.00";
     };
-
     on(restaurantField, "change", updateDepositValue);
 
-    // Auto-select restaurant
+    // Check localStorage to pre-fill the restaurant if the user navigated here from a recommendation
     const params = new URLSearchParams(window.location.search);
     const selectedRestaurant = params.get("restaurant") || localStorage.getItem("selectedRestaurant");
-    
-    if (restaurantField && selectedRestaurant) {
+    if (selectedRestaurant) {
         restaurantField.value = selectedRestaurant;
         updateDepositValue();
     }
 
-    // Sets form default values
+    // Enforce a minimum booking window (2 hours from now) to prevent immediate or past bookings
     const now = new Date();
     now.setHours(now.getHours() + 2);
-    
+    const adjustedDate = now.toISOString().split("T")[0];
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
-    
-    $("#date").value = $("#date").min = new Date().toISOString().split("T")[0];
+
+    $("#date").value = adjustedDate;
+    $("#date").min = adjustedDate;
     $("#time").value = `${hours}:${minutes}`;
     $("#people").value = 1;
 
-    // Payment method toggles
+    // Dynamically toggle required fields based on payment method 
+    // to ensure the user only submits relevant payment data
     $$('input[name="payment"]').forEach(option => {
-        on(option, "change", (e) => {
-            const isVoucher = e.target.value === "voucher";
-
+        on(option, "change", (event) => {
+            const isVoucher = event.target.value === "voucher";
             voucherSection.style.display = isVoucher ? "block" : "none";
             cardSection.style.display = isVoucher ? "none" : "block";
-
             $("#voucher").required = isVoucher;
             $("#card").required = !isVoucher;
         });
     });
 
-    // Email syncing helper
+    // Lock and sync the billing email field if it matches the contact email
     const syncBillingEmail = () => {
         billingEmail.value = sameEmail.checked ? emailInput.value : "";
         billingEmail.readOnly = sameEmail.checked;
     };
-
     on(sameEmail, "change", syncBillingEmail);
     on(emailInput, "input", () => { if (sameEmail.checked) syncBillingEmail(); });
 
@@ -165,7 +353,7 @@ if (reservationForm) {
         else if (date < today) errors.push("Reservation date cannot be in the past.");
         if (!time) errors.push("Please select a reservation time.");
         if (Number(people) <= 0) errors.push("Number of people must be greater than 0.");
-        
+
         if (!payment) {
             errors.push("Please select a deposit payment method.");
         } else if (payment.value === "online" && !cardPattern.test(card)) {
@@ -176,87 +364,33 @@ if (reservationForm) {
     });
 }
 
-// ================== Recommendation Page ==================
-const recommendationForm = $(".recommendation-form form");
-const resultsContainer = $("#results");
+// ================== Register Form ==================
+const registerForm = $(".register-form form");
 
-if (recommendationForm && resultsContainer) {
-    const restaurants = [
-        { name: "Ristorante Uno", cuisine: "Italian", price: "$20 - $45", diet: "none", budget: "medium", purpose: "family" },
-        { name: "Restaurant Deux", cuisine: "French", price: "$40 - $90", diet: "none", budget: "high", purpose: "date" },
-        { name: "Restaurante Tres", cuisine: "Spanish", price: "$25 - $60", diet: "none", budget: "medium", purpose: "family" },
-        { name: "Restaurant Vier", cuisine: "German", price: "$20 - $50", diet: "vegan", budget: "medium", purpose: "family" },
-        { name: "Restaurante Cinco", cuisine: "Mexican", price: "$15 - $35", diet: "halal", budget: "low", purpose: "business" },
-        { name: "Ristorante Sei", cuisine: "Italian Seafood", price: "$50 - $110", diet: "none", budget: "high", purpose: "business" }
-    ];
-
-    on(recommendationForm, "submit", (event) => {
-        event.preventDefault();
-
+if (registerForm) {
+    on(registerForm, "submit", (event) => {
+        const errors = [];
+        const username = $("#username").value;
+        const email = $("#email").value;
+        const phone = $("#phone").value;
+        const password = $("#password").value;
+        const confirmPassword = $("#confirm-password").value;
+        const gender = $('input[name="gender"]:checked');
         const diet = $("#diet").value;
-        const budget = $("#budget").value;
-        const purpose = $("#purpose").value;
+        const country = $("#country").value;
 
-        let exactMatches = restaurants.filter(restaurant =>
-            (!diet || restaurant.diet === diet) &&
-            (!budget || restaurant.budget === budget) &&
-            (!purpose || restaurant.purpose === purpose)
-        );
+        if (!usernamePattern.test(username)) errors.push("Username must be at least 5 characters.");
+        if (!emailPattern.test(email)) errors.push("Please enter a valid email address.");
+        if (!registerPhonePattern.test(phone)) errors.push("Phone number must contain 8 to 15 digits.");
+        if (!passwordPattern.test(password)) errors.push("Password must be 10+ characters with upper, lower, number, and special character.");
+        if (password !== confirmPassword) errors.push("Passwords do not match.");
+        if (!gender) errors.push("Please select a gender.");
+        if (!diet) errors.push("Please select dietary preferences.");
+        if (!country) errors.push("Please select a country/region.");
 
-        let finalResults = exactMatches;
-
-        if (exactMatches.length === 0) {
-            // Calculate scores for partial matches
-            let partialMatches = restaurants.map(r => {
-                let score = 0;
-                if (diet && r.diet === diet) score++;
-                if (budget && r.budget === budget) score++;
-                if (purpose && r.purpose === purpose) score++;
-                return { ...r, score };
-            }).filter(r => r.score > 0).sort((a, b) => b.score - a.score);
-            
-            finalResults = partialMatches;
-        }
-
-        if (finalResults.length > 0) {
-            let html = exactMatches.length === 0 
-                ? `<h3>No exact matches, but here are some suggestions:</h3>` 
-                : ``;
-
-            html += finalResults.map(restaurant => `
-                <div class="recommendation-card">
-                    <h3>${restaurant.name}</h3>
-                    <p>${restaurant.cuisine}</p>
-                    <p>Price Range: ${restaurant.price}</p>
-                    <button class="select-btn" data-name="${restaurant.name}">Select</button>
-                </div>
-            `).join("");
-
-            resultsContainer.innerHTML = html;
-        } else {
-            resultsContainer.innerHTML = `
-                <div class="recommendation-card">
-                    <h3>No Match Found</h3>
-                    <p>Try broadening your search criteria.</p>
-                </div>`;
-        }
-    });
-
-    on(resultsContainer, "click", (event) => {
-        if (event.target.classList.contains("select-btn")) {
-            event.preventDefault();
-            redirectWithRestaurant(event.target.dataset.name);
-        }
+        displayErrors(errors, event, registerForm);
     });
 }
-
-// ================== Global Recommendation Buttons ==================
-document.addEventListener("click", (event) => {
-    if (event.target.classList.contains("select-btn") && !event.target.closest("#results")) {
-        event.preventDefault();
-        redirectWithRestaurant(event.target.dataset.name);
-    }
-});
 
 // ================== Bill Calculator ==================
 const restaurantSelect = $("#calc-restaurant");
@@ -265,32 +399,27 @@ const peopleInput = $("#calc-people");
 const totalInput = $("#calc-total");
 
 if (restaurantSelect && dishSelect && peopleInput && totalInput) {
-    const restaurantData = {
-        "Ristorante Uno": [{ dish: "Margherita Pizza", price: 18 }, { dish: "Spaghetti Carbonara", price: 22 }],
-        "Restaurant Deux": [{ dish: "Steak Frites", price: 35 }, { dish: "Crème Brûlée", price: 12 }],
-        "Restaurante Tres": [{ dish: "Seafood Paella", price: 28 }, { dish: "Garlic Prawns Tapas", price: 14 }],
-        "Restaurant Vier": [{ dish: "Chicken Schnitzel", price: 24 }, { dish: "Apple Strudel", price: 10 }],
-        "Restaurante Cinco": [{ dish: "Beef Tacos Trio", price: 16 }, { dish: "Chicken Enchiladas", price: 19 }],
-        "Ristorante Sei": [{ dish: "Lobster Ravioli", price: 32 }, { dish: "Grilled Seafood Platter", price: 45 }]
-    };
 
-    for (const restaurant in restaurantData) {
-        restaurantSelect.appendChild(new Option(restaurant, restaurant));
-    }
+    restaurantSelect.innerHTML = `<option value="">Select Restaurant</option>`;
+    restaurants.forEach(r => restaurantSelect.appendChild(new Option(r.name, r.name)));
 
+    // Re-calculates and formats the total string whenever inputs change
     const updateTotal = () => {
         const price = Number(dishSelect.value) || 0;
         const people = Number(peopleInput.value) || 0;
-        totalInput.value = `$${price * people}`;
+        totalInput.value = `$${(price * people).toFixed(2)}`;
     };
 
-    on(restaurantSelect, "change", (e) => {
-        dishSelect.innerHTML = '<option value="">Select Dish</option>';
-        const dishes = restaurantData[e.target.value] || [];
+    // Repopulates the available dishes based on the selected restaurant
+    on(restaurantSelect, "change", (event) => {
+        dishSelect.innerHTML = `<option value="">Select Dish</option>`;
+        const selectedRestaurant = restaurants.find(r => r.name === event.target.value);
 
-        dishes.forEach(item => {
-            dishSelect.appendChild(new Option(`${item.dish} - $${item.price}`, item.price));
-        });
+        if (selectedRestaurant) {
+            selectedRestaurant.dishes.forEach(dish => {
+                dishSelect.appendChild(new Option(`${dish.name} - $${dish.price}`, dish.price));
+            });
+        }
         updateTotal();
     });
 
