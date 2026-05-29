@@ -639,15 +639,15 @@ if (reservationForm) {
         updateDepositValue();
     }
 
-    // Enforce a minimum booking window (2 hours from now) to prevent immediate or past bookings
+    // Enforce a minimum booking window (2 hours from now) to prevent past bookings
     const now = new Date();
     now.setHours(now.getHours() + 2);
     const adjustedDate = now.toISOString().split("T")[0];
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
 
+    $("#date").min = now;
     $("#date").value = adjustedDate;
-    $("#date").min = adjustedDate;
     $("#time").value = `${hours}:${minutes}`;
 
     // Dynamically toggle required fields based on payment method 

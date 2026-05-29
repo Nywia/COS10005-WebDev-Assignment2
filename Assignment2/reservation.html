@@ -53,7 +53,7 @@
                 <input type="tel" id="phone" name="phone" required>
 
                 <label for="restaurant">Restaurant Selection</label>
-                <select id="restaurant" name="restaurant" required></select>
+                <select id="restaurant" name="restaurant"></select>
 
                 <div class="datetime-row">
 
@@ -93,17 +93,17 @@
                 </fieldset>
 
                 <!-- Voucher Section -->
-                <section id="voucher-section">
+                <div id="voucher-section">
                     <label for="voucher">Voucher Code</label>
                     <input type="text" id="voucher" name="voucher"
                         maxlength="12" pattern="[0-9]{12}">
-                </section>
+                </div>
 
                 <!-- Card Section -->
-                <section id="card-section">
+                <div id="card-section">
                     <label for="card">Credit Card Details</label>
                     <input type="text" id="card" name="card" pattern="[0-9]{15,16}">
-                </section>
+                </div>
 
                 <label for="billing-email">Billing Email Address</label>
                 <input type="email" id="billing-email" name="billing-email">
