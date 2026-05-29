@@ -11,6 +11,18 @@ body {
     line-height: 1.6;
 }
 
+/* Hides the ugly spinner */
+input[type="number"] {
+  appearance: textfield;
+}
+
+/* Chrome, Safari, Edge */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
 /* ================== Header & Footer ================== */
 header,
 footer {
@@ -127,6 +139,49 @@ legend {
     padding: 0 8px;
 }
 
+.budget-row,
+.datetime-row {
+    display: flex;
+    gap: 12px;
+}
+
+#date,
+#time,
+#min-budget,
+#max-budget {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.datetime-field,
+.budget-field {
+    flex: 1;
+}
+
+.recommendation-form form {
+    width: 100%;
+}
+
+/* ================== Button Layout ================== */
+.button-row {
+    display: flex;
+    gap: 12px;
+}
+
+.button-row input[type="submit"] {
+    flex: 3;
+    background: #3a7bd5;
+}
+
+.button-row input[type="reset"] {
+    flex: 1;
+    background: #555;
+}
+
+.button-row input[type="reset"]:hover {
+    background: #666;
+}
+
 /* ================== Buttons ================== */
 input[type="submit"],
 input[type="reset"],
@@ -152,14 +207,150 @@ img {
     border-radius: 6px;
 }
 
-/* ================== Restaurant Cards ================== */
+/* ================== Card Layout ================== */
+#restaurant-container,
+#results {
+    display: grid;
+    gap: 20px;
+}
+
+.results-heading {
+    grid-column: 1 / -1;
+    margin-bottom: -5px;
+}
+
 .restaurant-card,
 .recommendation-card,
 .service-card {
     background: #2b2b2b;
-    padding: 15px;
-    margin-bottom: 20px;
     border-radius: 8px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    transition: transform 0.2s ease;
+}
+
+/* ================== Card Images ================== */
+.restaurant-card img,
+.recommendation-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ================== Card Content ================== */
+.restaurant-card-content,
+.recommendation-card-content {
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* ================== Card Buttons ================== */
+.restaurant-card button,
+.recommendation-card button {
+    width: 100%;
+    margin-top: auto;
+    border-radius: 0;
+}
+
+/* ================== Dish Calculator ================== */
+#dish-list {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+}
+
+.dish-card {
+    background: #2b2b2b;
+    border-radius: 8px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100%;
+}
+
+.dish-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.dish-card-content {
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.dish-header {
+    margin-bottom: 15px;
+}
+
+.dish-header h3 {
+    margin: 0 0 5px;
+    font-size: 1.05rem;
+}
+
+.dish-price {
+    color: #bdbdbd;
+    margin: 0;
+}
+
+.dish-controls {
+    margin-top: auto;
+
+    display: flex;
+    align-items: stretch;
+
+    /* remove gaps so it becomes one unit */
+    gap: 0;
+
+    border: 1px solid #555;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.dish-controls button {
+    width: 40px;
+    height: auto;
+
+    border: none;
+    border-radius: 0;
+
+    margin: 0;
+
+    background: #3a7bd5;
+    color: white;
+
+    font-size: 1.2rem;
+}
+
+.dish-controls input {
+    flex: 1;
+    width: auto;
+
+    text-align: center;
+    margin: 0;
+
+    border: none;
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.dish-controls button:hover {
+    background: #2f5fa5;
 }
 
 /* ================== Tablet ================== */
@@ -182,11 +373,9 @@ img {
         max-height: none;
     }
 
-    .restaurant-card,
-    .recommendation-card,
-    .service-card {
-        margin-left: auto;
-        margin-right: auto;
+    #restaurant-container,
+    #results {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -198,11 +387,14 @@ img {
         margin: 0 auto;
     }
 
+    #restaurant-container,
+    #results {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
     .restaurant-card:hover,
     .recommendation-card:hover,
     .service-card:hover {
         transform: translateY(-4px);
-
-        transition: transform 0.2s ease;
     }
 }

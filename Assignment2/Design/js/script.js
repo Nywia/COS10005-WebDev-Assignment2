@@ -24,7 +24,16 @@ const restaurants = [
         image: "Design/images/restaurant1.png",
         dishes: [
             { name: "Margherita Pizza", price: 18 },
-            { name: "Spaghetti Carbonara", price: 22 }
+            { name: "Spaghetti Carbonara", price: 22 },
+            { name: "Spaghetti Carbonara2", price: 23 },
+            { name: "Spaghetti Carbonara3", price: 24 },
+            { name: "Spaghetti Carbonara4", price: 25 },
+            { name: "Spaghetti Carbonara5", price: 26 },
+            { name: "Spaghetti Carbonara6", price: 27 },
+            { name: "Spaghetti Carbonara6", price: 27 },
+            { name: "Spaghetti Carbonara6", price: 27 },
+            { name: "Spaghetti Carbonara6", price: 27 },
+            { name: "Spaghetti Carbonara6", price: 27 },
         ],
         deposit: 10,
         priceRange: "$20 - $45",
@@ -223,7 +232,7 @@ if (recommendPurposeSelect) {
     });
 }
 
-// ================== Recommendation Page ==================
+// ================== Dynamic Recommendation Page ==================
 const recommendationForm = $(".recommendation-form form");
 const resultsContainer = $("#results");
 
@@ -237,18 +246,15 @@ if (recommendationForm && resultsContainer) {
             html += restaurantList.map(restaurant => `
                 <div class="recommendation-card">
                     <h3>${restaurant.name}</h3>
-
                     <p><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
                     <p><strong>Diet:</strong> ${formatOptionLabel(restaurant.diet)}</p>
                     <p><strong>Purpose:</strong> ${formatOptionLabel(restaurant.purpose)}</p>
                     <p><strong>Price Range:</strong> ${restaurant.priceRange}</p>
-
                     ${
                         showReasons && restaurant.matches
                         ? `<p><strong>Matched:</strong> ${restaurant.matches.join(", ")}</p>`
                         : ""
                     }
-
                     <button type="button" class="select-btn" data-name="${restaurant.name}">Select</button>
                 </div>
             `).join("");
@@ -268,7 +274,9 @@ if (recommendationForm && resultsContainer) {
         .sort(() => 0.5 - Math.random())
         .slice(0, 3);
         
-    renderRecommendations(randomRestaurants, `<h3>Today's Random Picks:</h3>`);
+    renderRecommendations(randomRestaurants,
+        `<div class="results-heading"><h3>Today's Random Picks:</h3></div>`
+    );
 
     on(recommendationForm, "submit", (event) => {
         event.preventDefault();
@@ -301,7 +309,7 @@ if (recommendationForm && resultsContainer) {
         });
         
         let finalResults = exactMatches;
-        let heading = `<h3>Your Matches:</h3>`;
+        let heading = `<div class="results-heading"><h3>Your Matches:</h3></div>`;
 
         // Fallback scoring system: if no exact match exists, rank options by how many criteria they meet, basically a fuzzy search
         // This ensures the user always gets a helpful suggestion rather than a dead end
@@ -338,13 +346,15 @@ if (recommendationForm && resultsContainer) {
             .filter(r => r.score > 0)
             .sort((a, b) => b.score - a.score);
 
-            heading = `<h3>No exact matches, but here are some suggestions:</h3>`;
+            heading = `
+                <div class="results-heading">
+                    <h3>No exact matches, but here are some suggestions:</h3>
+                </div>
+            `;
             renderRecommendations(finalResults, heading, true);
         } else {
             renderRecommendations(finalResults, heading);
         }
-
-        
     });
 
     on(resultsContainer, "click", (event) => {
@@ -492,35 +502,79 @@ if (registerForm) {
 
 // ================== Bill Calculator ==================
 const restaurantSelect = $("#calc-restaurant");
-const dishSelect = $("#calc-dish");
-const peopleInput = $("#calc-people");
 const totalInput = $("#calc-total");
+const dishList = $("#dish-list");
 
-if (restaurantSelect && dishSelect && peopleInput && totalInput) {
-
+if (restaurantSelect && totalInput && dishList) {
     restaurantSelect.innerHTML = `<option value="">Select Restaurant</option>`;
     restaurants.forEach(r => restaurantSelect.appendChild(new Option(r.name, r.name)));
 
-    // Re-calculates and formats the total string whenever inputs change
     const updateTotal = () => {
-        const price = Number(dishSelect.value) || 0;
-        const people = Number(peopleInput.value) || 0;
-        totalInput.value = `$${(price * people).toFixed(2)}`;
+        let total = 0;
+        $$(".dish-quantity").forEach(input => {
+            const quantity = Number(input.value) || 0;
+            const price = Number(input.dataset.price);
+            total += quantity * price;
+        });
+        totalInput.value = `$${total.toFixed(2)}`;
     };
 
-    // Repopulates the available dishes based on the selected restaurant
     on(restaurantSelect, "change", (event) => {
-        dishSelect.innerHTML = `<option value="">Select Dish</option>`;
+        dishList.innerHTML = "";
         const selectedRestaurant = restaurants.find(r => r.name === event.target.value);
 
-        if (selectedRestaurant) {
-            selectedRestaurant.dishes.forEach(dish => {
-                dishSelect.appendChild(new Option(`${dish.name} - $${dish.price}`, dish.price));
-            });
+        if (!selectedRestaurant) {
+            updateTotal();
+            return;
         }
+
+        dishList.innerHTML = selectedRestaurant.dishes.map(dish => `
+            <div class="dish-card">
+                <img src="${selectedRestaurant.image}" alt="${dish.name}">
+                <div class="dish-card-content">
+                    <div class="dish-header">
+                        <h3>${dish.name}</h3>
+                        <p class="dish-price">$${dish.price}</p>
+                    </div>
+                    <div class="dish-controls">
+                        <button type="button" class="minus-btn">-</button>
+                        <input 
+                            type="number"
+                            class="dish-quantity"
+                            data-price="${dish.price}"
+                            value="0"
+                            min="0"
+                        >
+                        <button type="button" class="plus-btn">+</button>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+
         updateTotal();
     });
 
-    on(dishSelect, "change", updateTotal);
-    on(peopleInput, "input", updateTotal);
+    on(dishList, "click", (event) => {
+        const input = event.target.parentElement?.querySelector(".dish-quantity");
+        if (!input) return;
+
+        let value = Number(input.value);
+
+        if (event.target.classList.contains("plus-btn")) {
+            value++;
+        }
+
+        if (event.target.classList.contains("minus-btn")) {
+            value = Math.max(0, value - 1);
+        }
+
+        input.value = value;
+        updateTotal();
+    });
+
+    on(dishList, "input", (event) => {
+        if (event.target.classList.contains("dish-quantity")) {
+            updateTotal();
+        }
+    });
 }

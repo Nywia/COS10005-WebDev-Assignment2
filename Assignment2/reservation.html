@@ -55,11 +55,19 @@
                 <label for="restaurant">Restaurant Selection</label>
                 <select id="restaurant" name="restaurant" required></select>
 
-                <label for="date">Reservation Date</label>
-                <input type="date" id="date" name="date" required>
+                <div class="datetime-row">
 
-                <label for="time">Reservation Time</label>
-                <input type="time" id="time" name="time" required>
+                    <div class="datetime-field">
+                        <label for="date">Reservation Date</label>
+                        <input type="date" id="date" name="date" required>
+                    </div>
+
+                    <div class="datetime-field">
+                        <label for="time">Reservation Time</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+
+                </div>
 
                 <label for="people">Number of People</label>
                 <input type="number" id="people" name="people" min="1" value="1" required>
