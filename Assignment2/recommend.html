@@ -44,28 +44,16 @@
             <form method="POST" action="https://mercury.swin.edu.au/it000000/cos10005/regtest.php">
 
                 <label for="diet">Dietary Preference</label>
-                <select id="diet" name="diet" required>
-                    <option value="">Select Option</option>
-                    <option value="vegan">Vegan</option>
-                    <option value="halal">Halal</option>
-                    <option value="none">None</option>
-                </select>
+                <select id="diet" name="diet"></select>
+                
+                <label for="min-budget">Min Budget ($)</label>
+                <input type="number" id="min-budget" name="min-budget" min="0" placeholder="No minimum">
 
-                <label for="budget">Budget Range</label>
-                <select id="budget" name="budget" required>
-                    <option value="">Select Option</option>
-                    <option value="low">$15 - $35</option>
-                    <option value="medium">$20 - $60</option>
-                    <option value="high">$40 - $110</option>
-                </select>
+                <label for="max-budget">Max Budget ($)</label>
+                <input type="number" id="max-budget" name="max-budget" min="0" placeholder="No maximum">
 
                 <label for="purpose">Dining Purpose</label>
-                <select id="purpose" name="purpose" required>
-                    <option value="">Select Option</option>
-                    <option value="family">Family</option>
-                    <option value="date">Date</option>
-                    <option value="business">Business</option>
-                </select>
+                <select id="purpose" name="purpose"></select>
 
                 <input type="submit" value="Submit">
                 <input type="reset" value="Reset">

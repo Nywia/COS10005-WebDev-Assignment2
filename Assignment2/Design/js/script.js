@@ -115,6 +115,14 @@ const restaurants = [
     }
 ];
 
+// ================== Dynamic Select Data ==================
+// Pulls unique values directly from the mock database instead of hardcoding form options everywhere
+const uniqueDiets = [...new Set(restaurants.map(r => r.diet))];
+const uniquePurposes = [...new Set(restaurants.map(r => r.purpose))];
+
+// Captalize the values to look nicer
+const formatOptionLabel = (value) => {return value.charAt(0).toUpperCase() + value.slice(1);};
+
 // ================== Dynamic Error Display ==================
 // Injects a visually cooler error box than the ugly alert notification  
 // and scrolling it into view so the user immediately notices
@@ -176,6 +184,45 @@ if (restaurantContainer) {
     `).join("");
 }
 
+// ================== Dynamic Form Options ==================
+// Populate all select menus using the database
+const registerDietSelect = $(".register-form #diet");
+const recommendDietSelect = $(".recommendation-form #diet");
+const recommendPurposeSelect = $(".recommendation-form #purpose");
+
+// Register diets
+if (registerDietSelect) {
+    registerDietSelect.innerHTML = `<option value="">Select Option</option>`;
+
+    uniqueDiets.forEach(diet => {
+        registerDietSelect.appendChild(
+            new Option(formatOptionLabel(diet), diet)
+        );
+    });
+}
+
+// Recommendation diets
+if (recommendDietSelect) {
+    recommendDietSelect.innerHTML = `<option value="">Select Option</option>`;
+
+    uniqueDiets.forEach(diet => {
+        recommendDietSelect.appendChild(
+            new Option(formatOptionLabel(diet), diet)
+        );
+    });
+}
+
+// Recommendation purposes
+if (recommendPurposeSelect) {
+    recommendPurposeSelect.innerHTML = `<option value="">Select Option</option>`;
+
+    uniquePurposes.forEach(purpose => {
+        recommendPurposeSelect.appendChild(
+            new Option(formatOptionLabel(purpose), purpose)
+        );
+    });
+}
+
 // ================== Recommendation Page ==================
 const recommendationForm = $(".recommendation-form form");
 const resultsContainer = $("#results");
@@ -183,14 +230,25 @@ const resultsContainer = $("#results");
 if (recommendationForm && resultsContainer) {
     
     // Ensure UI consistency whether showing random picks or search results
-    const renderRecommendations = (restaurantList, headingHtml = "") => {
+    const renderRecommendations = (restaurantList, headingHtml = "", showReasons = false) => {
         if (restaurantList.length > 0) {
             let html = headingHtml;
+
             html += restaurantList.map(restaurant => `
                 <div class="recommendation-card">
                     <h3>${restaurant.name}</h3>
-                    <p>${restaurant.cuisine}</p>
-                    <p>Price Range: ${restaurant.priceRange}</p>
+
+                    <p><strong>Cuisine:</strong> ${restaurant.cuisine}</p>
+                    <p><strong>Diet:</strong> ${formatOptionLabel(restaurant.diet)}</p>
+                    <p><strong>Purpose:</strong> ${formatOptionLabel(restaurant.purpose)}</p>
+                    <p><strong>Price Range:</strong> ${restaurant.priceRange}</p>
+
+                    ${
+                        showReasons && restaurant.matches
+                        ? `<p><strong>Matched:</strong> ${restaurant.matches.join(", ")}</p>`
+                        : ""
+                    }
+
                     <button type="button" class="select-btn" data-name="${restaurant.name}">Select</button>
                 </div>
             `).join("");
@@ -216,15 +274,31 @@ if (recommendationForm && resultsContainer) {
         event.preventDefault();
 
         const diet = $("#diet").value;
-        const budget = $("#budget").value;
         const purpose = $("#purpose").value;
+        
+        // Grab the new min and max inputs
+        const minBudgetStr = $("#min-budget").value;
+        const maxBudgetStr = $("#max-budget").value;
+        const minBudget = minBudgetStr ? parseInt(minBudgetStr, 10) : null;
+        const maxBudget = maxBudgetStr ? parseInt(maxBudgetStr, 10) : null;
 
         // Require all selected fields to match for a perfect recommendation
-        const exactMatches = restaurants.filter(r => 
-            (!diet || r.diet === diet) && 
-            (!budget || r.budget === budget) && 
-            (!purpose || r.purpose === purpose)
-        );
+        const exactMatches = restaurants.filter(r => {
+            // Extract the numbers from the "$20 - $45" string using regex
+            const prices = r.priceRange.match(/\d+/g);
+            const rMin = parseInt(prices[0], 10);
+            const rMax = parseInt(prices[1], 10);
+
+            const matchesDiet = !diet || r.diet === diet;
+            const matchesPurpose = !purpose || r.purpose === purpose;
+
+            let matchesBudget = true;
+            // The restaurant's lowest/highest price must be higher/lower user's min/max budget
+            if (minBudget !== null && rMin <= minBudget) matchesBudget = false;
+            if (maxBudget !== null && rMax >= maxBudget) matchesBudget = false;
+
+            return matchesDiet && matchesPurpose && matchesBudget;
+        });
         
         let finalResults = exactMatches;
         let heading = `<h3>Your Matches:</h3>`;
@@ -234,18 +308,43 @@ if (recommendationForm && resultsContainer) {
         if (exactMatches.length === 0) {
             finalResults = restaurants.map(restaurant => {
                 let score = 0;
-                if (diet && restaurant.diet === diet) score++;
-                if (budget && restaurant.budget === budget) score++;
-                if (purpose && restaurant.purpose === purpose) score++;
-                return { ...restaurant, score };
+                const matches = [];
+                
+                const prices = restaurant.priceRange.match(/\d+/g);
+                const rMin = parseInt(prices[0], 10);
+                const rMax = parseInt(prices[1], 10);
+
+                if (diet && restaurant.diet === diet) {
+                    score++;
+                    matches.push("Diet");
+                }
+
+                if (purpose && restaurant.purpose === purpose) {
+                    score++;
+                    matches.push("Purpose");
+                }
+
+                let matchesBudget = true;
+                if (minBudget !== null && rMin <= minBudget) matchesBudget = false;
+                if (maxBudget !== null && rMax >= maxBudget) matchesBudget = false;
+
+                if ((minBudget !== null || maxBudget !== null) && matchesBudget) {
+                    score++;
+                    matches.push("Budget");
+                }
+
+                return { ...restaurant, score, matches };
             })
             .filter(r => r.score > 0)
             .sort((a, b) => b.score - a.score);
 
             heading = `<h3>No exact matches, but here are some suggestions:</h3>`;
+            renderRecommendations(finalResults, heading, true);
+        } else {
+            renderRecommendations(finalResults, heading);
         }
 
-        renderRecommendations(finalResults, heading);
+        
     });
 
     on(resultsContainer, "click", (event) => {
@@ -310,7 +409,6 @@ if (reservationForm) {
     $("#date").value = adjustedDate;
     $("#date").min = adjustedDate;
     $("#time").value = `${hours}:${minutes}`;
-    $("#people").value = 1;
 
     // Dynamically toggle required fields based on payment method 
     // to ensure the user only submits relevant payment data
